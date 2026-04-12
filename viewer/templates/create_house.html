@@ -1,65 +1,152 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Créer Maison - Mouain 360{% endblock %}
+{% block title %}Créer une Propriété — Mouain 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-wrapper {
+        max-width: 680px;
+        margin: 3rem auto;
+        padding: 0 1rem;
+    }
+    .back-link {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        color: rgba(229,233,238,0.5); text-decoration: none;
+        font-size: 0.875rem; margin-bottom: 1.5rem; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--primary); }
+    .upload-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .upload-title span { color: var(--primary); }
+    .upload-subtitle { color: rgba(229,233,238,0.45); font-size: 0.95rem; margin-bottom: 2rem; }
+    .upload-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(1,238,254,0.12);
+        border-radius: 22px; padding: 2.5rem;
+        backdrop-filter: blur(12px);
+    }
+    .field-label {
+        display: block; font-size: 0.82rem; font-weight: 700;
+        color: var(--primary); text-transform: uppercase;
+        letter-spacing: 1.5px; margin-bottom: 0.55rem;
+    }
+    .field-hint { font-size: 0.78rem; color: rgba(229,233,238,0.35); margin-top: 0.4rem; }
+    .upload-card input[type="text"],
+    .upload-card textarea {
+        width: 100%; padding: 0.85rem 1.1rem;
+        background: rgba(255,255,255,0.05);
+        border: 1.5px solid rgba(1,238,254,0.15);
+        border-radius: 12px; color: var(--light);
+        font-size: 0.95rem; font-family: 'Inter', sans-serif;
+        transition: border-color 0.25s; outline: none;
+        resize: vertical;
+    }
+    .upload-card input[type="text"]:focus,
+    .upload-card textarea:focus {
+        border-color: var(--primary); background: rgba(1,238,254,0.04);
+        box-shadow: 0 0 0 3px rgba(1,238,254,0.08);
+    }
+    .drop-zone {
+        border: 2px dashed rgba(1,238,254,0.25); border-radius: 16px;
+        padding: 2rem 1.5rem; text-align: center; cursor: pointer;
+        transition: all 0.3s; background: rgba(1,238,254,0.02); position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+        border-color: var(--primary); background: rgba(1,238,254,0.06);
+    }
+    .drop-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+        width: 100%; height: 100%;
+    }
+    .drop-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+    .drop-text { font-size: 0.95rem; font-weight: 600; color: var(--light); }
+    .drop-sub  { font-size: 0.78rem; color: rgba(229,233,238,0.4); margin-top: 0.3rem; }
+    .file-name-display { margin-top: 0.6rem; font-size: 0.82rem; color: var(--primary); font-weight: 600; display: none; }
+    .form-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 1.6rem 0; }
+    .field-optional { color: rgba(229,233,238,0.3); font-size: 0.72rem; margin-left: 0.5rem; font-weight: 400; text-transform: none; }
+    .btn-upload {
+        width: 100%; padding: 1rem;
+        background: linear-gradient(135deg, #01eefe, #0074ff);
+        color: #0d1117; border: none; border-radius: 12px;
+        font-weight: 800; font-size: 1rem; cursor: pointer;
+        transition: all 0.3s; margin-bottom: 0.8rem;
+    }
+    .btn-upload:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(1,238,254,0.3); }
+    .btn-back-secondary {
+        display: block; width: 100%; padding: 0.85rem;
+        background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
+        border-radius: 12px; color: rgba(229,233,238,0.7);
+        text-align: center; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .btn-back-secondary:hover { border-color: rgba(229,233,238,0.25); color: var(--light); }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <div class="mb-3" style="font-size: 3rem;">🏠</div>
-                        <h2 class="card-title mb-2">Créer une Maison</h2>
-                        <p class="text-muted">Nouvelle visite virtuelle immersive</p>
-                    </div>
-                    
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <strong>Erreur(s) :</strong>
-                            <ul class="mb-0">
-                            {% for field, errors in form.errors.items %}
-                                {% for error in errors %}
-                                <li>{{ field|title }}: {{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="mb-4">
-                            <label for="id_name" class="form-label">Nom de la Maison *</label>
-                            {{ form.name }}
-                            <small class="form-text text-muted">Ex: "Villa Sunset", "Appartement Centre-Ville"</small>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="id_description" class="form-label">Description</label>
-                            {{ form.description }}
-                            <small class="form-text text-muted">Description de la propriété</small>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="id_floor_plan_image" class="form-label">Plan d'Étage (Optionnel)</label>
-                            {{ form.floor_plan_image }}
-                            <small class="form-text text-muted">Téléchargez le plan pour voir les emplacements des pièces</small>
-                        </div>
-                        
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                ✓ Créer la Maison
-                            </button>
-                            <a href="{% url 'house_list' %}" class="btn btn-secondary">
-                                ← Retour
-                            </a>
-                        </div>
-                    </form>
+<div class="upload-wrapper">
+    <a href="{% url 'house_list' %}" class="back-link">← Retour aux propriétés</a>
+
+    <h1 class="upload-title">Nouvelle <span>Propriété</span></h1>
+    <p class="upload-subtitle">Créez un espace de visite virtuelle 360° immersive pour votre bien immobilier.</p>
+
+    <div class="upload-card">
+        <form method="post" enctype="multipart/form-data" id="createForm">
+            {% csrf_token %}
+
+            <!-- Name -->
+            <div style="margin-bottom:1.4rem;">
+                <label class="field-label" for="id_name">Nom de la propriété</label>
+                {{ form.name }}
+                <p class="field-hint">Ex: Villa Jasmine, Appartement T3 Centre-Ville…</p>
+            </div>
+
+            <!-- Description -->
+            <div style="margin-bottom:1.4rem;">
+                <label class="field-label" for="id_description">
+                    Description <span class="field-optional">(optionnel)</span>
+                </label>
+                {{ form.description }}
+                <p class="field-hint">Décrivez brièvement la propriété (surface, emplacement, points forts…)</p>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Floor plan image -->
+            <div>
+                <label class="field-label">
+                    Image du plan d'étage <span class="field-optional">(optionnel)</span>
+                </label>
+                <div class="drop-zone" id="dropZone">
+                    {{ form.floor_plan_image }}
+                    <div class="drop-icon">🏗️</div>
+                    <div class="drop-text">Glissez votre plan ici</div>
+                    <div class="drop-sub">ou cliquez pour parcourir • JPG / PNG</div>
+                    <div class="file-name-display" id="fileNameDisplay"></div>
                 </div>
             </div>
-        </div>
+
+            <hr class="form-divider">
+
+            <button type="submit" class="btn-upload">🏠 Créer la propriété</button>
+            <a href="{% url 'house_list' %}" class="btn-back-secondary">Annuler</a>
+        </form>
     </div>
 </div>
+
+<script>
+    const zone = document.getElementById('dropZone');
+    const fileInput = zone.querySelector('input[type="file"]');
+    const display = document.getElementById('fileNameDisplay');
+    if (zone && fileInput) {
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                display.textContent = '✓ ' + fileInput.files[0].name;
+                display.style.display = 'block';
+            }
+        });
+    }
+</script>
 {% endblock %}

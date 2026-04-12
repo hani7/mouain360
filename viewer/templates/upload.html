@@ -1,59 +1,286 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Télécharger Image 360° - Mouain 360{% endblock %}
+{% block title %}Télécharger Image 360° — Mouain 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-wrapper {
+        max-width: 680px;
+        margin: 3rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Breadcrumb / back */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(229,233,238,0.5);
+        text-decoration: none;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* Page title */
+    .upload-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+    }
+    .upload-title span { color: var(--primary); }
+    .upload-subtitle {
+        color: rgba(229,233,238,0.45);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Glass form card */
+    .upload-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(1,238,254,0.12);
+        border-radius: 22px;
+        padding: 2.5rem;
+        backdrop-filter: blur(12px);
+    }
+
+    /* Section labels */
+    .field-label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 0.55rem;
+    }
+    .field-hint {
+        font-size: 0.78rem;
+        color: rgba(229,233,238,0.35);
+        margin-top: 0.4rem;
+    }
+
+    /* Text input */
+    .upload-card input[type="text"],
+    .upload-card input[type="number"] {
+        width: 100%;
+        padding: 0.85rem 1.1rem;
+        background: rgba(255,255,255,0.05);
+        border: 1.5px solid rgba(1,238,254,0.15);
+        border-radius: 12px;
+        color: var(--light);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        transition: border-color 0.25s;
+        outline: none;
+    }
+    .upload-card input[type="text"]:focus,
+    .upload-card input[type="number"]:focus {
+        border-color: var(--primary);
+        background: rgba(1,238,254,0.04);
+        box-shadow: 0 0 0 3px rgba(1,238,254,0.08);
+    }
+    .upload-card input[type="text"]::placeholder { color: rgba(229,233,238,0.25); }
+
+    /* Drag & drop zone */
+    .drop-zone {
+        border: 2px dashed rgba(1,238,254,0.25);
+        border-radius: 16px;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: rgba(1,238,254,0.02);
+        position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+        border-color: var(--primary);
+        background: rgba(1,238,254,0.06);
+    }
+    .drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+    .drop-icon { font-size: 2.8rem; margin-bottom: 0.8rem; }
+    .drop-text { font-size: 1rem; font-weight: 600; color: var(--light); }
+    .drop-sub  { font-size: 0.8rem; color: rgba(229,233,238,0.4); margin-top: 0.4rem; }
+    .file-name-display {
+        margin-top: 0.8rem;
+        font-size: 0.82rem;
+        color: var(--primary);
+        font-weight: 600;
+        display: none;
+    }
+
+    /* Divider */
+    .form-divider {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        margin: 1.8rem 0;
+    }
+
+    /* Error alert */
+    .upload-alert {
+        background: rgba(255,107,107,0.1);
+        border: 1px solid rgba(255,107,107,0.25);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        color: #ff6b6b;
+        font-size: 0.88rem;
+        margin-bottom: 1.5rem;
+    }
+    .upload-alert ul { margin: 0.4rem 0 0 1rem; padding: 0; }
+
+    /* Buttons */
+    .btn-upload {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #01eefe, #0074ff);
+        color: #0d1117;
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 0.8rem;
+    }
+    .btn-upload:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(1,238,254,0.3);
+    }
+    .btn-back-secondary {
+        display: block;
+        width: 100%;
+        padding: 0.85rem;
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        color: rgba(229,233,238,0.7);
+        text-align: center;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .btn-back-secondary:hover {
+        border-color: rgba(229,233,238,0.25);
+        color: var(--light);
+    }
+
+    /* Format badge */
+    .format-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+    }
+    .badge-format {
+        background: rgba(1,238,254,0.08);
+        border: 1px solid rgba(1,238,254,0.2);
+        color: var(--primary);
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <div class="mb-3" style="font-size: 3rem;">📷</div>
-                        <h2 class="card-title mb-2">Télécharger Image 360°</h2>
-                        <p class="text-muted">Ajoutez une nouvelle visite virtuelle</p>
-                    </div>
-                    
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+<div class="upload-wrapper">
 
-                        {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <strong>Erreur(s) :</strong>
-                            <ul class="mb-0">
-                            {% for field, errors in form.errors.items %}
-                                {% for error in errors %}
-                                <li>{{ field|title }}: {{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="mb-4">
-                            <label for="id_title" class="form-label">Titre de la Visite</label>
-                            {{ form.title }}
-                            <small class="form-text text-muted">Donnez un nom descriptif à votre visite</small>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="id_image" class="form-label">Image 360° (Équirectangulaire)</label>
-                            {{ form.image }}
-                            <small class="form-text text-muted">Format recommandé : Image panoramique 360° équirectangulaire (ratio 2:1)</small>
-                        </div>
-                        
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                ✓ Télécharger
-                            </button>
-                            <a href="{% url 'view_images' %}" class="btn btn-secondary">
-                                ← Retour
-                            </a>
-                        </div>
-                    </form>
+    <!-- Back link -->
+    <a href="{% url 'view_images' %}" class="back-link">
+        ← Retour à la galerie
+    </a>
+
+    <!-- Page header -->
+    <h1 class="upload-title">Ajouter une <span>Image 360°</span></h1>
+    <p class="upload-subtitle">Téléversez votre panorama équirectangulaire pour lancer une visite virtuelle immersive.</p>
+
+    <!-- Form card -->
+    <div class="upload-card">
+
+        <!-- Errors -->
+        {% if form.errors %}
+        <div class="upload-alert">
+            <strong>Veuillez corriger les erreurs suivantes :</strong>
+            <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}<li>{{ field|title }} : {{ error }}</li>{% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+
+            <!-- Title field -->
+            <div style="margin-bottom:1.4rem;">
+                <label class="field-label" for="id_title">Titre de la visite</label>
+                {{ form.title }}
+                <p class="field-hint">Ex: Salon principal, Vue terrasse, Appartement T3…</p>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- File drop zone -->
+            <div>
+                <label class="field-label">Image 360° (fichier)</label>
+                <div class="drop-zone" id="dropZone">
+                    {{ form.image }}
+                    <div class="drop-icon">🌐</div>
+                    <div class="drop-text">Glissez votre image ici</div>
+                    <div class="drop-sub">ou cliquez pour parcourir</div>
+                    <div class="file-name-display" id="fileNameDisplay"></div>
+                </div>
+                <div class="format-badges">
+                    <span class="badge-format">JPG / JPEG</span>
+                    <span class="badge-format">PNG</span>
+                    <span class="badge-format">Ratio 2:1 recommandé</span>
+                    <span class="badge-format">Max recommandé : 30 Mo</span>
                 </div>
             </div>
-        </div>
+
+            <hr class="form-divider">
+
+            <!-- Submit -->
+            <button type="submit" class="btn-upload">✓ Téléverser l'image</button>
+            <a href="{% url 'view_images' %}" class="btn-back-secondary">Annuler</a>
+
+        </form>
     </div>
 </div>
+
+<script>
+    // Drag & drop visual feedback
+    const zone = document.getElementById('dropZone');
+    const fileInput = zone.querySelector('input[type="file"]');
+    const display = document.getElementById('fileNameDisplay');
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            display.textContent = '✓ ' + fileInput.files[0].name;
+            display.style.display = 'block';
+        }
+    });
+
+    // Add form-control class to django input
+    document.querySelectorAll('#uploadForm input[type="text"]').forEach(el => {
+        el.setAttribute('placeholder', 'Ex : Salon, Chambre, Vue panoramique…');
+    });
+</script>
 {% endblock %}
