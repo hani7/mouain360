@@ -72,7 +72,7 @@ def verify_otp_view(request):
                 del request.session['registration_user_id']
                 login(request, user)
                 messages.success(request, f'Bienvenue {user.username} ! Votre compte a été vérifié avec succès.')
-                return redirect('house_list')
+                return redirect('dashboard')
             else:
                 messages.error(request, 'Le code fourni est incorrect. Veuillez réessayer.')
         except UserOTP.DoesNotExist:
@@ -111,14 +111,14 @@ def resend_otp_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('house_list')
+        return redirect('dashboard')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, f'Bon retour, {user.username} !')
-            next_url = request.GET.get('next', 'house_list')
+            next_url = request.GET.get('next', 'dashboard')
             return redirect(next_url)
         else:
             messages.error(request, 'Nom d\'utilisateur ou mot de passe invalide.')
