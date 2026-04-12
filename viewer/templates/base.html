@@ -510,9 +510,6 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'floor_plan_list' %}active-nav{% endif %}" href="{% url 'floor_plan_list' %}">Plans d'Étage</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'upload_image' %}active-nav{% endif %}" href="{% url 'upload_image' %}">Ajouter</a>
-                    </li>
                 </ul>
             </div>
             
@@ -530,6 +527,7 @@
                         <li><span class="dropdown-item-text" style="color:rgba(229,233,238,0.5);font-size:0.8rem;">Connecté en tant que</span></li>
                         <li><span class="dropdown-item-text" style="color:#01eefe;font-weight:700;">{{ user.username }}</span></li>
                         <li><hr class="dropdown-divider" style="border-color:rgba(1,238,254,0.1);"></li>
+                        <li><a class="dropdown-item" href="{% url 'profile' %}" style="color:var(--light);font-weight:600;">👤 Voir Profile</a></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}" style="color:#ff6b6b;font-weight:600;">⎋ Déconnexion</a></li>
                     </ul>
                 </div>

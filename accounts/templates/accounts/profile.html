@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil — Mouain 360</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #01eefe;
+            --dark: #0d1117;
+            --light: #e5e9ee;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+            background: rgba(20, 25, 35, 0.95);
+            border-bottom: 1px solid rgba(1,238,254,0.12);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(20px);
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .topbar-logo { height: 40px; }
+        .topbar-back {
+            color: rgba(229,233,238,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .topbar-back:hover { color: var(--primary); }
+
+        /* Page body */
+        .page-body {
+            max-width: 860px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .page-title span { color: var(--primary); }
+        .page-subtitle {
+            color: rgba(229,233,238,0.5);
+            margin-bottom: 2.5rem;
+        }
+
+        /* Alerts */
+        .alert { border-radius:10px; padding:0.9rem 1.2rem; margin-bottom:1.5rem; font-size:0.9rem; }
+        .alert-success { background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.25); color:#00ff88; }
+        .alert-danger  { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.25); color:#ff6b6b; }
+
+        /* Glass card */
+        .glass-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(1,238,254,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+        .card-heading {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        /* Avatar */
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .avatar-circle {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #01eefe, #0074ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 800; color: #0d1117;
+            box-shadow: 0 0 30px rgba(1,238,254,0.3);
+            flex-shrink: 0;
+        }
+        .user-info h2 { font-size: 1.5rem; font-weight: 700; }
+        .user-info p { color: rgba(229,233,238,0.5); font-size: 0.9rem; margin-top: 0.3rem; }
+
+        /* Stats row */
+        .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+        .stat-box { text-align:center; padding:1.2rem; background:rgba(1,238,254,0.05); border-radius:14px; border:1px solid rgba(1,238,254,0.1); }
+        .stat-num { font-size:2rem; font-weight:800; color:var(--primary); text-shadow:0 0 15px rgba(1,238,254,0.4); }
+        .stat-lbl { font-size:0.78rem; color:rgba(229,233,238,0.5); text-transform:uppercase; letter-spacing:1.5px; margin-top:0.3rem; }
+
+        /* Form fields */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-label { font-size:0.85rem; font-weight:600; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem; display:block; }
+        .form-input {
+            width:100%; padding:0.8rem 1rem;
+            background:rgba(255,255,255,0.05);
+            border:1.5px solid rgba(1,238,254,0.15);
+            border-radius:10px; color:var(--light);
+            font-size:0.95rem; font-family:'Inter',sans-serif;
+            transition:border-color 0.2s;
+            outline:none;
+        }
+        .form-input:focus { border-color: var(--primary); background:rgba(1,238,254,0.04); }
+        .form-input::placeholder { color:rgba(229,233,238,0.3); }
+
+        .btn-save {
+            width:100%; padding:0.9rem;
+            background: linear-gradient(135deg, #01eefe, #0074ff);
+            color:#0d1117; border:none; border-radius:10px;
+            font-weight:800; font-size:1rem; cursor:pointer;
+            transition: all 0.3s;
+            margin-top:0.5rem;
+        }
+        .btn-save:hover { opacity:0.9; transform:translateY(-2px); box-shadow:0 8px 25px rgba(1,238,254,0.3); }
+
+        .meta-info { font-size:0.82rem; color:rgba(229,233,238,0.35); margin-top:0.4rem; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="{% static 'images/logo.png' %}" alt="Mouain 360" class="topbar-logo">
+        <a href="{% url 'dashboard' %}" class="topbar-back">← Tableau de bord</a>
+    </div>
+</div>
+
+<div class="page-body">
+    <h1 class="page-title">Mon <span>Profil</span></h1>
+    <p class="page-subtitle">Gérez vos informations et votre sécurité.</p>
+
+    <!-- Messages -->
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Identity Card -->
+    <div class="glass-card">
+        <div class="card-heading">👤 Identité</div>
+        <div class="avatar-section">
+            <div class="avatar-circle">{{ user.username|first|upper }}</div>
+            <div class="user-info">
+                <h2>{{ user.username }}</h2>
+                <p>{{ user.email }}</p>
+                <p class="meta-info">Compte créé le : {{ user.date_joined|date:"d M. Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="glass-card">
+        <div class="card-heading">📊 Statistiques</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-num">{{ house_count }}</div>
+                <div class="stat-lbl">Propriétés</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">{{ room_count }}</div>
+                <div class="stat-lbl">Pièces 360°</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">{{ floorplan_count }}</div>
+                <div class="stat-lbl">Plans 2D</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="glass-card">
+        <div class="card-heading">🔒 Changer le mot de passe</div>
+        <form method="POST" action="{% url 'profile' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Mot de passe actuel</label>
+                <input type="password" name="current_password" class="form-input" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nouveau mot de passe</label>
+                <input type="password" name="new_password1" class="form-input" placeholder="Minimum 8 caractères">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                <input type="password" name="new_password2" class="form-input" placeholder="Confirmer...">
+            </div>
+            <button type="submit" class="btn-save">Mettre à jour le mot de passe</button>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -10,7 +11,7 @@ from .models import UserOTP
 
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('house_list')
+        return redirect('dashboard')
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
@@ -130,3 +131,40 @@ def logout_view(request):
     logout(request)
     messages.info(request, 'Vous avez été déconnecté.')
     return redirect('login')
+
+
+@login_required
+def profile_view(request):
+    from viewer.models import House, Room
+    from floor_plan.models import FloorPlan
+
+    if request.method == 'POST':
+        # Handle password change
+        current_pw = request.POST.get('current_password', '')
+        new_pw1 = request.POST.get('new_password1', '')
+        new_pw2 = request.POST.get('new_password2', '')
+
+        if current_pw and new_pw1 and new_pw2:
+            if not request.user.check_password(current_pw):
+                messages.error(request, 'Mot de passe actuel incorrect.')
+            elif new_pw1 != new_pw2:
+                messages.error(request, 'Les nouveaux mots de passe ne correspondent pas.')
+            elif len(new_pw1) < 8:
+                messages.error(request, 'Le nouveau mot de passe doit contenir au moins 8 caractères.')
+            else:
+                request.user.set_password(new_pw1)
+                request.user.save()
+                messages.success(request, 'Mot de passe mis à jour avec succès. Veuillez vous reconnecter.')
+                logout(request)
+                return redirect('login')
+
+    house_count = House.objects.filter(owner=request.user).count()
+    room_count = Room.objects.filter(house__owner=request.user).count()
+    floorplan_count = FloorPlan.objects.filter(owner=request.user).count()
+
+    context = {
+        'house_count': house_count,
+        'room_count': room_count,
+        'floorplan_count': floorplan_count,
+    }
+    return render(request, 'accounts/profile.html', context)
