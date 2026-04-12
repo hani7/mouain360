@@ -80,6 +80,35 @@ def verify_otp_view(request):
             
     return render(request, 'accounts/verify_otp.html', {'email': user.email})
 
+def resend_otp_view(request):
+    if 'registration_user_id' not in request.session:
+        return redirect('register')
+        
+    user_id = request.session['registration_user_id']
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect('register')
+        
+    # Generate new OTP
+    otp_code = str(random.randint(100000, 999999))
+    user_otp, created = UserOTP.objects.get_or_create(user=user, defaults={'otp': otp_code})
+    if not created:
+        user_otp.otp = otp_code
+        user_otp.save()
+        
+    # Send Email
+    subject = 'Nouveau code de vérification - Mouain 360'
+    message = f'Bonjour {user.username},\n\nVotre nouveau code de vérification est : {otp_code}\n\nL\'équipe Mouain 360.'
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+        messages.success(request, 'Un nouveau code a été envoyé à votre adresse e-mail.')
+    except Exception as e:
+        messages.error(request, f'Erreur lors de l\'envoi de l\'e-mail.')
+        print(e)
+        
+    return redirect('verify_otp')
+
 
 def login_view(request):
     if request.user.is_authenticated:

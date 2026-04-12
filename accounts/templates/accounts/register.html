@@ -52,16 +52,17 @@
             0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
         }
-        .brand {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            text-shadow: 0 0 30px rgba(1,238,254,0.4);
-            margin-bottom: 1rem;
+        .brand-logo {
+            max-width: 280px;
+            margin-bottom: 1.5rem;
             position: relative;
             z-index: 2;
+            animation: floatLogo 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(1, 238, 254, 0.5));
+        }
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
         .brand-sub {
             color: #ffffff;
@@ -232,7 +233,7 @@
     <!-- Left branding panel -->
     <div class="auth-left">
         <div id="panorama"></div>
-        <div class="brand">MOUAIN 360</div>
+        <img src="{% static 'images/logo.png' %}" alt="Mouain 360" class="brand-logo">
         <p class="brand-sub">La plateforme premium pour des visites virtuelles immersives de propriétés. Créez, partagez et explorez des espaces comme jamais auparavant.</p>
     </div>
 
