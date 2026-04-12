@@ -209,3 +209,65 @@ def superadmin_delete_user(request, user_id):
             messages.error(request, "Impossible de supprimer un compte Super Administrateur via cette interface.")
             
     return redirect('superadmin_dashboard')
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_houses(request):
+    """Suivi de toutes les maisons virtuelles"""
+    from viewer.models import House
+    from floor_plan.models import FloorPlan
+    
+    houses = House.objects.select_related('owner').annotate(
+        room_count=Count('rooms', distinct=True)
+    ).order_by('-created_at')
+    
+    return render(request, 'accounts/superadmin_houses.html', {
+        'houses': houses,
+        'total_users': User.objects.count(),
+        'total_houses': House.objects.count(),
+        'total_floor_plans': FloorPlan.objects.count(),
+    })
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_delete_house(request, house_id):
+    """Supprime une maison depuis l'espace admin"""
+    if request.method == 'POST':
+        from viewer.models import House
+        try:
+            house = House.objects.get(id=house_id)
+            name = house.name
+            house.delete()
+            messages.success(request, f"La maison '{name}' a été supprimée.")
+        except House.DoesNotExist:
+            pass
+    return redirect('superadmin_houses')
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_floor_plans(request):
+    """Suivi de tous les plans d'étage"""
+    from viewer.models import House
+    from floor_plan.models import FloorPlan
+    
+    floor_plans = FloorPlan.objects.select_related('owner').annotate(
+        hotspot_count=Count('hotspots', distinct=True)
+    ).order_by('-created_at')
+    
+    return render(request, 'accounts/superadmin_floor_plans.html', {
+        'floor_plans': floor_plans,
+        'total_users': User.objects.count(),
+        'total_houses': House.objects.count(),
+        'total_floor_plans': FloorPlan.objects.count(),
+    })
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_delete_floor_plan(request, plan_id):
+    """Supprime un plan d'étage depuis l'espace admin"""
+    if request.method == 'POST':
+        from floor_plan.models import FloorPlan
+        try:
+            plan = FloorPlan.objects.get(id=plan_id)
+            title = plan.title
+            plan.delete()
+            messages.success(request, f"Le plan '{title}' a été supprimé.")
+        except FloorPlan.DoesNotExist:
+            pass
+    return redirect('superadmin_floor_plans')

@@ -14,6 +14,10 @@ urlpatterns = [
     # Super Admin Dashboard
     path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('superadmin/delete-user/<int:user_id>/', views.superadmin_delete_user, name='superadmin_delete_user'),
+    path('superadmin/houses/', views.superadmin_houses, name='superadmin_houses'),
+    path('superadmin/delete-house/<int:house_id>/', views.superadmin_delete_house, name='superadmin_delete_house'),
+    path('superadmin/floor-plans/', views.superadmin_floor_plans, name='superadmin_floor_plans'),
+    path('superadmin/delete-floor-plan/<int:plan_id>/', views.superadmin_delete_floor_plan, name='superadmin_delete_floor_plan'),
     
     # Password Reset
     path('password_reset/', auth_views.PasswordResetView.as_view(
