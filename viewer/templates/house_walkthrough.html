@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ house.name }} - Virtual Walkthrough</title>
+    
+    <!-- Pannellum CSS -->
+    <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #panorama {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .info-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+            padding: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .info-bar h1 {
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .current-room {
+            color: #4CAF50;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .btn-exit {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+        
+        .btn-exit:hover {
+            background: #f44336;
+        }
+        
+        .floor-plan-overlay {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .floor-plan-overlay h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .floor-plan-mini {
+            width: 100%;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .current-marker {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border: 3px solid #01eefe;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 8px rgba(1, 238, 254, 0.6);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 8px rgba(1,238,254,0.6); }
+            50% { transform: translate(-50%, -50%) scale(1.4); box-shadow: 0 0 18px rgba(1,238,254,0.9); }
+        }
+        
+        /* Custom Scene Hotspot Styling matching floor plan */
+        .pnlm-scene {
+            background-image: none !important;
+            background-color: rgba(1, 238, 254, 0.4) !important; /* Make it visible like a glass button */
+            width: 32px !important;
+            height: 32px !important;
+            border: 3px solid #01eefe !important;
+            border-radius: 50% !important;
+            box-shadow: 0 0 8px rgba(1, 238, 254, 0.6) !important;
+            animation: pulse-hotspot 2s infinite !important;
+            cursor: pointer !important;
+        }
+        
+        .pnlm-scene:hover {
+            background-color: rgba(1, 238, 254, 0.8) !important;
+            box-shadow: 0 0 15px rgba(1, 238, 254, 1) !important;
+        }
+        
+        /* Do NOT animate 'transform' here, it breaks Pannellum's inline 3D positioning! */
+        @keyframes pulse-hotspot {
+            0%, 100% { box-shadow: 0 0 8px rgba(1,238,254,0.5); }
+            50% { box-shadow: 0 0 25px rgba(1,238,254,1), inset 0 0 10px rgba(1,238,254,0.5); }
+        }
+        
+        /* Ensure hotspot tooltip is positioned correctly since we removed background sprite */
+        .pnlm-scene .pnlm-tooltip {
+            margin-top: 15px !important; 
+            display: none;
+        }
+        
+        .pnlm-scene:hover .pnlm-tooltip {
+            display: block !important;
+        }
+        
+        .room-list {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .room-list h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .room-list-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        
+        .room-list-item:hover {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .room-list-item.active {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .no-rooms {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Info Bar -->
+    <div class="info-bar">
+        <div>
+            <h1>🏠 {{ house.name }}</h1>
+            <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
+        </div>
+        <div class="controls">
+            <a href="{% url 'house_detail' house.id %}" class="btn">⚙️ Manage</a>
+            <a href="{% url 'house_list' %}" class="btn btn-exit">✕ Exit</a>
+        </div>
+    </div>
+    
+    <!-- Main Panorama Viewer -->
+    {% if starting_room %}
+    <div id="panorama"></div>
+    {% else %}
+    <div class="no-rooms">
+        <h2>No Rooms Available</h2>
+        <p>Add 360° room images to start the walkthrough</p>
+        <a href="{% url 'house_detail' house.id %}" class="btn" style="margin-top: 20px;">Add Rooms</a>
+    </div>
+    {% endif %}
+    
+    <!-- Floor Plan Mini Map -->
+    {% if house.floor_plan_image %}
+    <div class="floor-plan-overlay">
+        <h3>📐 Floor Plan</h3>
+        <div style="position: relative;">
+            <img src="{{ house.floor_plan_image.url }}" alt="Floor Plan" class="floor-plan-mini">
+            <div class="current-marker" id="current-marker" style="display: none;"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Room List -->
+    <div class="room-list">
+        <h3>Rooms ({{ rooms.count }})</h3>
+        {% for room in rooms %}
+        <div class="room-list-item" 
+             onclick="loadScene('room_{{ room.id }}')"
+             data-room-id="{{ room.id }}"
+             data-room-title="{{ room.title }}"
+             {% if room.floor_plan_x %}data-x="{{ room.floor_plan_x }}" data-y="{{ room.floor_plan_y }}"{% endif %}>
+            {{ room.title }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pannellum JS -->
+    <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+    
+    <script>
+        {% if starting_room %}
+        // Parse scenes from Django
+        const scenes = {{ scenes_json|safe }};
+        
+        // Initialize Pannellum viewer
+        const viewer = pannellum.viewer('panorama', {
+            "default": {
+                "firstScene": "room_{{ starting_room.id }}",
+                "autoLoad": true,
+                "sceneFadeDuration": 1000
+            },
+            "scenes": scenes
+        });
+        
+        // Update current room display on scene change
+        viewer.on('scenechange', function(sceneId) {
+            const roomItems = document.querySelectorAll('.room-list-item');
+            roomItems.forEach(item => {
+                item.classList.remove('active');
+                if (sceneId === 'room_' + item.dataset.roomId) {
+                    item.classList.add('active');
+                    document.getElementById('current-room-name').textContent = item.dataset.roomTitle;
+                    
+                    // Update floor plan marker
+                    const marker = document.getElementById('current-marker');
+                    if (item.dataset.x && item.dataset.y) {
+                        marker.style.left = item.dataset.x + '%';
+                        marker.style.top = item.dataset.y + '%';
+                        marker.style.display = 'block';
+                    } else {
+                        marker.style.display = 'none';
+                    }
+                }
+            });
+        });
+        
+        // Function to load a scene from room list
+        function loadScene(sceneId) {
+            viewer.loadScene(sceneId);
+        }
+        
+        // Set initial active room
+        document.querySelector(`[data-room-id="{{ starting_room.id }}"]`).classList.add('active');
+        
+        // Set initial floor plan marker
+        {% if starting_room.floor_plan_x %}
+        const marker = document.getElementById('current-marker');
+        marker.style.left = '{{ starting_room.floor_plan_x }}%';
+        marker.style.top = '{{ starting_room.floor_plan_y }}%';
+        marker.style.display = 'block';
+        {% endif %}
+        {% endif %}
+    </script>
+</body>
+</html>

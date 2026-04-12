@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ house.name }} - Gérer{% endblock %}
+
+{% block content %}
+<style>
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .btn:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-primary {
+    background-color: #2196F3;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0b7dda;
+  }
+  
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .btn-danger {
+    background-color: #f44336;
+  }
+  
+  .btn-danger:hover {
+    background-color: #da190b;
+  }
+  
+  .floor-plan-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+  
+  .floor-plan-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+  }
+  
+  .floor-plan-img {
+    width: 100%;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .room-marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #4CAF50;
+    border-radius: 50%;
+    border: 3px solid white;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .room-marker:hover {
+    background: #45a049;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  
+  .room-label {
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  
+  .rooms-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .room-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    background: #f9f9f9;
+  }
+  
+  .room-card.starting {
+    border-color: #4CAF50;
+    background: #e8f5e9;
+  }
+  
+  .room-card h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+  
+  .room-card .badge {
+    background: #4CAF50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-left: 5px;
+  }
+  
+  .room-card .stats {
+    font-size: 12px;
+    color: #666;
+    margin: 10px 0;
+  }
+  
+  .room-card .actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .no-rooms {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+  }
+</style>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>🏠 {{ house.name }}</h1>
+      {% if house.description %}
+      <p style="color: #666; margin-top: 5px;">{{ house.description }}</p>
+      {% endif %}
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <a href="{% url 'house_list' %}" class="btn btn-primary">← Retour à la Liste</a>
+      {% if rooms %}
+      <a href="{% url 'house_walkthrough' house.id %}" class="btn">🚶 Démarrer la Visite</a>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Floor Plan Section -->
+  {% if house.floor_plan_image %}
+  <div class="floor-plan-section">
+    <h2>📐 Plan d'Étage</h2>
+    <div class="floor-plan-wrapper" id="floor-plan-wrapper">
+      <img src="{{ house.floor_plan_image.url }}" alt="Floor Plan" class="floor-plan-img" id="floor-plan-img">
+      
+      <!-- Room markers on floor plan -->
+      {% for room in rooms %}
+        {% if room.floor_plan_x and room.floor_plan_y %}
+        <div class="room-marker" 
+             style="left: {{ room.floor_plan_x }}%; top: {{ room.floor_plan_y }}%;"
+             title="{{ room.title }}">
+          {{ forloop.counter }}
+          <span class="room-label">{{ room.title }}</span>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Rooms Section -->
+  <div class="rooms-section">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>📷 Pièces ({{ rooms.count }})</h2>
+      <a href="{% url 'add_room' house.id %}" class="btn">➕ Ajouter une Pièce</a>
+    </div>
+    
+    {% if rooms %}
+    <div class="rooms-grid">
+      {% for room in rooms %}
+      <div class="room-card {% if room.is_starting_point %}starting{% endif %}">
+        <h4>
+          {{ room.title }}
+          {% if room.is_starting_point %}
+          <span class="badge">DÉPART</span>
+          {% endif %}
+        </h4>
+        
+        <div class="stats">
+          <div>🔗 {{ room.connections_from.count }} connexion(s)</div>
+          <div>📅 {{ room.uploaded_at|date:"d M Y" }}</div>
+          {% if room.floor_plan_x %}
+          <div>📍 Positionné sur le plan</div>
+          {% endif %}
+        </div>
+        
+        <div class="actions">
+          <a href="{% url 'add_connection' room.id %}" class="btn btn-small">Ajouter Connexion</a>
+          {% if house.floor_plan_image and not room.floor_plan_x %}
+          <button class="btn btn-small btn-primary" onclick="setRoomPosition({{ room.id }}, '{{ room.title }}')">
+            Définir Position
+          </button>
+          {% endif %}
+          <form method="post" action="{% url 'delete_room' room.id %}" style="display: inline;" onsubmit="return confirm('Supprimer cette pièce ?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-small btn-danger">Supprimer</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-rooms">
+      <h3>Aucune pièce pour l'instant</h3>
+      <p>Ajoutez votre première image 360° pour démarrer la visite virtuelle</p>
+      <a href="{% url 'add_room' house.id %}" class="btn" style="margin-top: 15px;">➕ Ajouter une Pièce</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+let positioningRoomId = null;
+let positioningRoomTitle = null;
+
+function setRoomPosition(roomId, roomTitle) {
+  positioningRoomId = roomId;
+  positioningRoomTitle = roomTitle;
+  alert(`Cliquez sur le plan pour définir la position de "${roomTitle}"`);
+  document.getElementById('floor-plan-wrapper').style.cursor = 'crosshair';
+}
+
+document.getElementById('floor-plan-wrapper')?.addEventListener('click', function(e) {
+  if (!positioningRoomId) return;
+  
+  const img = document.getElementById('floor-plan-img');
+  const rect = img.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+  
+  // Save position to server
+  fetch(`/viewer/room/${positioningRoomId}/edit-position/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ x: x, y: y })
+  }).then(response => {
+    if (response.ok) {
+      alert(`Position définie pour "${positioningRoomTitle}"`);
+      location.reload();
+    }
+  });
+  
+  positioningRoomId = null;
+  this.style.cursor = 'default';
+});
+</script>
+{% endblock %}

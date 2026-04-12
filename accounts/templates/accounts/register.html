@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S'inscrire — Mouain 360</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
+    <style>
+        :root {
+            --primary: #01eefe;
+            --dark: #0d1117;
+            --dark2: #161b22;
+            --light: #e5e9ee;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Left panel */
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #0d1117 0%, #0a1628 50%, #0d2137 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(1,238,254,0.08) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+        .brand {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(1,238,254,0.4);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        .brand-sub {
+            color: rgba(229,233,238,0.5);
+            font-size: 1rem;
+            text-align: center;
+            position: relative;
+            max-width: 320px;
+            line-height: 1.7;
+            z-index: 2;
+        }
+
+        /* Pannellum Container */
+        #panorama {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        /* Gradient Overlay for Text Readability */
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(13, 17, 23, 0.9) 0%, rgba(10, 22, 40, 0.7) 50%, rgba(13, 33, 55, 0.8) 100%);
+            z-index: 1;
+        }
+        .pnlm-controls-container {
+            display: none !important; /* Hide controls for auth background */
+        }
+
+        /* Right panel */
+        .auth-right {
+            width: 480px;
+            min-width: 420px;
+            background: var(--dark2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            border-left: 1px solid rgba(1,238,254,0.1);
+            position: relative;
+        }
+
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 0.5rem;
+        }
+        .auth-subtitle {
+            color: rgba(229,233,238,0.5);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Messages */
+        .messages-list { margin-bottom: 1rem; }
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .message.error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; }
+        .message.success { background: rgba(0,201,167,0.15); border: 1px solid rgba(0,201,167,0.3); color: #00c9a7; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1.1rem;
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(1,238,254,0.15);
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+            background: rgba(1,238,254,0.04);
+            box-shadow: 0 0 0 3px rgba(1,238,254,0.1);
+        }
+        .form-input::placeholder { color: rgba(229,233,238,0.3); }
+        .help-text {
+            font-size: 0.75rem;
+            color: rgba(229,233,238,0.35);
+            margin-top: 0.3rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: #0d1117;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 20px rgba(1,238,254,0.25);
+        }
+        .btn-submit:hover {
+            background: #4df3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(1,238,254,0.4);
+        }
+
+        .auth-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: rgba(229,233,238,0.5);
+        }
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: rgba(229,233,238,0.25);
+            font-size: 0.8rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(229,233,238,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .auth-left { display: none; }
+            .auth-right { width: 100%; min-width: unset; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Left branding panel -->
+    <div class="auth-left">
+        <div id="panorama"></div>
+        <div class="brand">MOUAIN 360</div>
+        <p class="brand-sub">La plateforme premium pour des visites virtuelles immersives de propriétés. Créez, partagez et explorez des espaces comme jamais auparavant.</p>
+    </div>
+
+    <!-- Right Panel: Auth Form -->
+    <div class="auth-right">
+        <img src="{% static 'images/logo.png' %}" alt="Mouain 360" style="max-height: 50px; margin-bottom: 20px; align-self: flex-start;">
+        <h1 class="auth-title">Créer un Compte</h1>
+        <p class="auth-subtitle">Démarrez votre essai gratuit — aucune carte requise</p>
+
+        {% if messages %}
+        <div class="messages-list">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="id_username">Nom d'utilisateur</label>
+                <input class="form-input" type="text" name="username" id="id_username"
+                       placeholder="Choisissez un nom d'utilisateur" maxlength="150" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_email">Adresse e-mail</label>
+                <input class="form-input" type="email" name="email" id="id_email"
+                       placeholder="votre@email.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_password1">Mot de passe</label>
+                <input class="form-input" type="password" name="password1" id="id_password1"
+                       placeholder="Créez un mot de passe sécurisé" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_password2">Confirmer le mot de passe</label>
+                <input class="form-input" type="password" name="password2" id="id_password2"
+                       placeholder="Répétez votre mot de passe" required>
+                <p class="help-text">8 caractères minimum.</p>
+            </div>
+            <button type="submit" class="btn-submit">Créer le compte →</button>
+        </form>
+
+        <div class="auth-footer">
+            Vous avez déjà un compte ? <a href="{% url 'login' %}">Se connecter</a>
+        </div>
+    </div>
+
+    <!-- Pannellum JS -->
+    <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+    <script>
+        pannellum.viewer('panorama', {
+            "type": "equirectangular",
+            "panorama": "{% static 'images/auth_bg_360_modern.jpg' %}", // Using the user's custom JPG image
+            "autoLoad": true,
+            "autoRotate": -2,
+            "showControls": false,
+            "mouseZoom": false,
+            "draggable": false,
+            "disableKeyboardCtrl": true
+        });
+    </script>
+</body>
+</html>

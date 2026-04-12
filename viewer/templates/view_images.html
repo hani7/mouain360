@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Visites 360° - Mouain 360{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="display-5 fw-bold mb-2">📷 Visites Virtuelles 360°</h1>
+            <p class="text-muted mb-0">Explorez nos expériences immersives</p>
+        </div>
+        <a href="{% url 'upload_image' %}" class="btn btn-primary glow">
+            <i class="me-2">➕</i> Nouvelle Visite
+        </a>
+    </div>
+
+    {% if images %}
+    <div class="row g-4">
+        {% for image in images %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 property-card">
+                <div class="position-relative">
+                    <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.title }}" style="height: 220px; object-fit: cover;">
+                    <span class="position-absolute top-0 end-0 m-3 badge">
+                        360°
+                    </span>
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">{{ image.title }}</h5>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.85rem;">
+                        <span><i>📅</i> {{ image.uploaded_at|date:"d M Y" }}</span>
+                        <span><i>⏰</i> {{ image.uploaded_at|date:"H:i" }}</span>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-auto">
+                        <a href="{% url 'view_360_image' image.id %}" class="btn btn-primary">
+                            🔍 Voir en 360°
+                        </a>
+                        <div class="btn-group" role="group">
+                            <button onclick="copyLink('{{ image.id }}')" class="btn btn-secondary btn-sm">
+                                🔗
+                            </button>
+                            <a href="{% url 'download_qr_code' image.id %}" class="btn btn-secondary btn-sm">
+                                📱
+                            </a>
+                            <form action="{% url 'delete_image' image.id %}" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card text-center empty-state">
+        <div class="card-body py-5">
+            <div class="mb-4" style="font-size: 5rem; opacity: 0.3;">📷</div>
+            <h3 class="mb-3">Aucune visite disponible</h3>
+            <p class="text-muted mb-4">Téléchargez votre première image 360°</p>
+            <a href="{% url 'upload_image' %}" class="btn btn-primary btn-lg glow">
+                ➕ Télécharger une Image 360°
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.property-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.property-card:hover {
+    transform: translateY(-12px) scale(1.02);
+}
+
+.property-card .card-img-top {
+    transition: all 0.4s ease;
+}
+
+.property-card:hover .card-img-top {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+    function confirmDelete() {
+        return confirm("Êtes-vous sûr de vouloir supprimer cette visite ?");
+    }
+
+    function copyLink(imageId) {
+        const shareUrl = window.location.origin + "/viewer/view/" + imageId + "/";
+        
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(1, 238, 254, 0.95);
+                color: #212529;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                font-weight: 600;
+                z-index: 9999;
+                box-shadow: 0 8px 32px rgba(1, 238, 254, 0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = '✓ Lien copié!';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }).catch(() => {
+            alert("Lien copié!");
+        });
+    }
+</script>
+
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+</style>
+{% endblock %}

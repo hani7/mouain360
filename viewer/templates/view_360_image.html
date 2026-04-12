@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}360 View Images{% endblock %}
+
+{% block content %}
+
+    <!-- Pannellum CSS (For 360° viewer) -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.pannellum.org/2.5/pannellum.css">
+
+    <style>
+        /* Make the viewer fill the whole screen */
+        #panorama {
+            width: 100%;
+            height: 800px; /* Adjust the height as necessary */
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+    </style>
+    <h1>{{ image.title }}</h1>
+
+    <!-- Pannellum Viewer -->
+    <div id="panorama"></div>
+
+    <!-- Pannellum JS -->
+    <script type="text/javascript" src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+
+    <script type="text/javascript">
+        pannellum.viewer('panorama', {
+            "type": "equirectangular",  // Image type (equirectangular is used for 360 images)
+            "panorama": "{{ image.image.url }}",  // The image URL to use for the 360-degree view
+            "autoLoad": true,
+            "autoRotate": -2,  // Rotate automatically, change the speed here
+            "hotSpots": []  // Optional: You can add hotspots for additional interactivity
+        });
+    </script>
+
+
+    <br>
+    <a href="{% url 'view_images' %}">Back to Image List</a>
+{% endblock %}
+    {% block script %}
+
+    <script>
+        function copyLink() {
+            // Get the current page URL (the 360-degree view page URL)
+            const shareUrl = window.location.href;
+            
+            // Create a temporary input element to copy the URL
+            const tempInput = document.createElement("input");
+            document.body.appendChild(tempInput);
+            tempInput.value = shareUrl;
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            // Show message
+            document.getElementById("share-message").innerText = "Link copied to clipboard!";
+        }
+    </script>
+    {% endblock %}

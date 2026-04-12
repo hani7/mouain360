@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Ajouter une Pièce — {{ house.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .form-container h1 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="file"],
+  .form-group input[type="checkbox"] {
+    margin-top: 5px;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .btn-primary {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-secondary {
+    background-color: #ccc;
+    color: #333;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #bbb;
+  }
+  
+  .help-text {
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+  }
+</style>
+
+<div class="form-container">
+  <h1>📷 Ajouter une Pièce — {{ house.name }}</h1>
+  
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      {% if form.errors %}
+      <div style="background-color: #ffebee; color: #c62828; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: 1px solid #ef9a9a;">
+        <strong>Veuillez corriger les erreurs suivantes :</strong>
+        <ul style="margin-top: 5px; margin-bottom: 0; padding-left: 20px;">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li>{{ field|title }}: {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      
+      <div class="form-group">
+      <label for="id_title">Nom de la Pièce *</label>
+      {{ form.title }}
+      <div class="help-text">Ex : Salon, Chambre Principale, Cuisine</div>
+    </div>
+    
+    <div class="form-group">
+      <label for="id_image">Image 360° *</label>
+      {{ form.image }}
+      <div class="help-text">Importez une image 360° équirectangulaire de cette pièce</div>
+    </div>
+    
+    <div class="form-group">
+      <div class="checkbox-wrapper">
+        {{ form.is_starting_point }}
+        <label for="id_is_starting_point" style="margin: 0;">Définir comme point de départ</label>
+      </div>
+      <div class="help-text">Cette pièce sera la première affichée lors de la visite</div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Ajouter la Pièce</button>
+      <a href="{% url 'house_detail' house.id %}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

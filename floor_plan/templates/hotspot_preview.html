@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ hotspot.label }}</title>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <style>
+        body { margin: 0; }
+        #panorama {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="panorama"></div>
+
+    <script>
+        pannellum.viewer('panorama', {
+            type: 'equirectangular',
+            panorama: "{{ hotspot.target_image.url }}",
+            autoLoad: true,
+            showZoomCtrl: true
+        });
+    </script>
+</body>
+</html>
