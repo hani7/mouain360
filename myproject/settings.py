@@ -139,3 +139,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.mouin360.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'noreply@mouin360.com'
+EMAIL_HOST_PASSWORD = 'Mohamed2026++' # Fill in your password
+DEFAULT_FROM_EMAIL = 'Mouain 360 <noreply@mouin360.com>'
+
+# For testing in development without valid credentials
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
