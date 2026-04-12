@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord - Mouain 360{% endblock %}
+
+{% block content %}
+<style>
+    /* Metric Cards */
+    .metric-card {
+        background: rgba(13, 17, 23, 0.4);
+        border: 1px solid rgba(1, 238, 254, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(1, 238, 254, 0.3);
+        box-shadow: 0 10px 30px rgba(1, 238, 254, 0.1);
+    }
+    .metric-value {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: var(--primary, #01eefe);
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 20px rgba(1, 238, 254, 0.5);
+    }
+    .metric-label {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+    }
+    
+    /* Action Buttons */
+    .action-card {
+        background: rgba(1, 238, 254, 0.05);
+        border: 1px dashed rgba(1, 238, 254, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    .action-card:hover {
+        background: rgba(1, 238, 254, 0.1);
+        border-style: solid;
+        color: var(--primary, #01eefe);
+        transform: translateY(-3px);
+    }
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Listed Activity */
+    .activity-list {
+        background: rgba(13, 17, 23, 0.6);
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+        overflow: hidden;
+    }
+    .activity-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .activity-item:hover {
+        background: rgba(1, 238, 254, 0.03);
+    }
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold mb-2" style="color: white;">
+                Bonjour, <span style="color: var(--primary, #01eefe);">{{ user.username }}</span>
+            </h1>
+            <p class="text-muted fs-5">Bienvenue sur votre espace de gestion de visites virtuelles 360°.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger px-4 rounded-pill">Déconnexion</a>
+        </div>
+    </div>
+
+    <!-- Metrics Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">{{ house_count }}</div>
+                <div class="metric-label">Propriétés</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">{{ room_count }}</div>
+                <div class="metric-label">Pièces 360°</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-value">{{ floorplan_count }}</div>
+                <div class="metric-label">Plans 2D</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions & Recent Activity -->
+    <div class="row g-5">
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <h3 class="h4 mb-4 text-white">Actions Rapides</h3>
+            
+            <a href="{% url 'create_house' %}" class="action-card mb-3">
+                <span class="action-icon">🏠</span>
+                <strong class="d-block">Créer une Propriété</strong>
+                <small class="text-muted">Démarrez une nouvelle visite virtuelle</small>
+            </a>
+            
+            <a href="{% url 'house_list' %}" class="action-card mb-3">
+                <span class="action-icon">🖼️</span>
+                <strong class="d-block">Gérer mes Visites</strong>
+                <small class="text-muted">Éditez vos propriétés existantes</small>
+            </a>
+
+            <a href="{% url 'floor_plan_list' %}" class="action-card">
+                <span class="action-icon">📍</span>
+                <strong class="d-block">Vos Plans 2D</strong>
+                <small class="text-muted">Cartes et repères interactifs</small>
+            </a>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="h4 text-white mb-0">Créations Récentes</h3>
+                <a href="{% url 'house_list' %}" class="text-primary text-decoration-none">Voir tout &rarr;</a>
+            </div>
+            
+            <div class="activity-list">
+                {% if recent_houses %}
+                    {% for house in recent_houses %}
+                    <div class="activity-item">
+                        <div>
+                            <h4 class="h5 text-white mb-1">{{ house.name }}</h4>
+                            <small class="text-muted">Créée le : {{ house.created_at|date:"d M. Y à H:i" }}</small>
+                        </div>
+                        <a href="{% url 'house_detail' house.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Gérer</a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <p class="mb-0 fs-5">Aucune propriété créée pour le moment.</p>
+                        <p>Commencez en utilisant le bouton "Créer une Propriété".</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

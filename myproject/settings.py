@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/viewer/houses/'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 

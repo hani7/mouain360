@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Dashboard
+    path('dashboard/', views.dashboard, name='dashboard'),
+    
     # Original image viewer URLs
     path('upload/', views.upload_image, name='upload_image'),
     path('view/', views.view_images, name='view_images'),

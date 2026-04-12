@@ -227,6 +227,9 @@
             .auth-left { display: none; }
             .auth-right { width: 100%; min-width: unset; }
         }
+        @media (min-width: 769px) {
+            .logo-mobile-only { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -239,7 +242,7 @@
 
     <!-- Right Panel: Auth Form -->
     <div class="auth-right">
-        <img src="{% static 'images/logo.png' %}" alt="Mouain 360" style="max-height: 50px; margin-bottom: 20px; align-self: flex-start;">
+        <img src="{% static 'images/logo.png' %}" alt="Mouain 360" class="logo-mobile-only" style="max-height: 50px; margin-bottom: 20px; align-self: flex-start;">
         <h1 class="auth-title">Créer un Compte</h1>
         <p class="auth-subtitle">Démarrez votre essai gratuit — aucune carte requise</p>
 
@@ -287,7 +290,7 @@
     <script>
         pannellum.viewer('panorama', {
             "type": "equirectangular",
-            "panorama": "{% static 'images/auth_bg_360_modern.jpg' %}", // Using the user's custom JPG image
+            "panorama": "{% static 'images/auth_bg_360_modern_compressed.jpg' %}", // Using optimized image
             "autoLoad": true,
             "autoRotate": -2,
             "showControls": false,

@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Image(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='standalone_images', null=True, blank=True)
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='360_images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -10,6 +12,7 @@ class Image(models.Model):
 
 class House(models.Model):
     """Represents a property/house with multiple 360° images"""
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='houses', null=True, blank=True)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     floor_plan_image = models.ImageField(upload_to='floor_plans/', blank=True, null=True)

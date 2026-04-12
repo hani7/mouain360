@@ -12,7 +12,9 @@ def upload_floor_plan(request):
     if request.method == 'POST':
         form = FloorPlanForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            floor_plan = form.save(commit=False)
+            floor_plan.owner = request.user
+            floor_plan.save()
             return redirect('floor_plan_list')
     else:
         form = FloorPlanForm()
@@ -21,13 +23,13 @@ def upload_floor_plan(request):
 
 @login_required
 def floor_plan_list(request):
-    plans = FloorPlan.objects.all()
+    plans = FloorPlan.objects.filter(owner=request.user)
     return render(request, 'floor_plan_list.html', {'plans': plans})
 
 
 @login_required
 def floor_plan_detail(request, pk):
-    plan = get_object_or_404(FloorPlan, pk=pk)
+    plan = get_object_or_404(FloorPlan, pk=pk, owner=request.user)
 
     if request.method == 'POST':
         # Check if it's a file upload for the floor plan
@@ -78,7 +80,7 @@ def update_hotspot_position(request, hotspot_id):
         x = data.get('x_percent')
         y = data.get('y_percent')
 
-        hotspot = get_object_or_404(Hotspot, id=hotspot_id)
+        hotspot = get_object_or_404(Hotspot, id=hotspot_id, floor_plan__owner=request.user)
         hotspot.x_percent = x
         hotspot.y_percent = y
         hotspot.save()
@@ -87,12 +89,28 @@ def update_hotspot_position(request, hotspot_id):
 
 @login_required
 def hotspot_preview(request, pk):
-    hotspot = get_object_or_404(Hotspot, pk=pk)
+    hotspot = get_object_or_404(Hotspot, pk=pk, floor_plan__owner=request.user)
     return render(request, 'hotspot_preview.html', {'hotspot': hotspot})
 
 @login_required
 @require_POST
 def delete_floor_plan(request, pk):
-    plan = get_object_or_404(FloorPlan, pk=pk)
+    plan = get_object_or_404(FloorPlan, pk=pk, owner=request.user)
     plan.delete()
     return redirect('floor_plan_list')
+
+@login_required
+@require_POST
+def delete_hotspot(request, hotspot_id):
+    hotspot = get_object_or_404(Hotspot, id=hotspot_id, floor_plan__owner=request.user)
+    plan_id = hotspot.floor_plan.id
+    hotspot.delete()
+    return redirect('floor_plan_detail', pk=plan_id)
+
+@login_required
+@require_POST
+def delete_attachment(request, attachment_id):
+    attachment = get_object_or_404(FloorPlanAttachment, id=attachment_id, floor_plan__owner=request.user)
+    plan_id = attachment.floor_plan.id
+    attachment.delete()
+    return redirect('floor_plan_detail', pk=plan_id)
