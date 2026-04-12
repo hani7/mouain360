@@ -12,6 +12,9 @@ urlpatterns = [
     path('delete/<int:image_id>/', views.delete_image, name='delete_image'),
     path('download_qr_code/<int:image_id>/', views.download_qr_code, name='download_qr_code'),
     
+    # Public tour URL (no login required)
+    path('tour/<uuid:share_token>/', views.public_walkthrough, name='public_tour'),
+    
     # House walkthrough URLs
     path('houses/', views.house_list, name='house_list'),
     path('house/create/', views.create_house, name='create_house'),

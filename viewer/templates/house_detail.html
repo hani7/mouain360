@@ -182,7 +182,17 @@
     <div style="display: flex; gap: 10px;">
       <a href="{% url 'house_list' %}" class="btn btn-primary">← Retour à la Liste</a>
       {% if rooms %}
+      <button onclick="copyPublicLink()" class="btn" style="background:#01eefe;color:#0d1117;font-weight:bold;">🔗 Copier le lien public</button>
       <a href="{% url 'house_walkthrough' house.id %}" class="btn">🚶 Démarrer la Visite</a>
+      
+      <script>
+      function copyPublicLink() {
+          const url = window.location.origin + "{% url 'public_tour' house.share_token %}";
+          navigator.clipboard.writeText(url).then(() => {
+              alert('Lien public copié dans le presse-papier !');
+          });
+      }
+      </script>
       {% endif %}
     </div>
   </div>

@@ -219,7 +219,41 @@ def house_walkthrough(request, house_id):
     
     return render(request, 'house_walkthrough.html', {
         'house': house,
-        'rooms': rooms,
-        'starting_room': starting_room,
-        'scenes_json': json.dumps(scenes)
+        'scenes_json': json.dumps(scenes),
+        'default_scene': f'room_{starting_room.id}' if starting_room else None
+    })
+
+def public_walkthrough(request, share_token):
+    """Public walkthrough viewer using share token (no login required)"""
+    house = get_object_or_404(House, share_token=share_token)
+    rooms = house.rooms.all()
+    
+    # Get starting room (or first room if none marked)
+    starting_room = house.rooms.filter(is_starting_point=True).first()
+    if not starting_room:
+        starting_room = house.rooms.first()
+    
+    # Build scenes configuration for Pannellum
+    scenes = {}
+    for room in rooms:
+        connections = room.connections_from.all()
+        hotspots = []
+        for conn in connections:
+            hotspots.append({
+                'pitch': conn.pitch,
+                'yaw': conn.yaw,
+                'type': 'scene',
+                'text': conn.label,
+                'sceneId': f'room_{conn.to_room.id}'
+            })
+        scenes[f'room_{room.id}'] = {
+            'title': room.title,
+            'panorama': room.image.url,
+            'hotSpots': hotspots
+        }
+        
+    return render(request, 'public_walkthrough.html', {
+        'house': house,
+        'scenes_json': json.dumps(scenes),
+        'default_scene': f'room_{starting_room.id}' if starting_room else None
     })

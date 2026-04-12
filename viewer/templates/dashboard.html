@@ -105,7 +105,7 @@
     <div class="row mb-5 align-items-center">
         <div class="col-12">
             <h1 class="display-4 fw-bold mb-2" style="color: white;">
-                Bonjour, <span style="color: var(--primary, #01eefe);">{{ user.username }}</span>
+                Bonjour, <span style="color: var(--primary, #01eefe);">{{ user.username }}</span> 👋
             </h1>
             <p class="text-muted fs-5">Bienvenue sur votre espace de gestion de visites virtuelles 360°.</p>
         </div>
@@ -115,19 +115,19 @@
     <div class="row g-4 mb-5">
         <div class="col-md-4">
             <div class="metric-card">
-                <div class="metric-value">{{ house_count }}</div>
+                <div class="metric-value" data-target="{{ house_count }}">0</div>
                 <div class="metric-label">Propriétés</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="metric-card">
-                <div class="metric-value">{{ room_count }}</div>
+                <div class="metric-value" data-target="{{ room_count }}">0</div>
                 <div class="metric-label">Pièces 360°</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="metric-card">
-                <div class="metric-value">{{ floorplan_count }}</div>
+                <div class="metric-value" data-target="{{ floorplan_count }}">0</div>
                 <div class="metric-label">Plans 2D</div>
             </div>
         </div>
@@ -173,7 +173,10 @@
                             <h4 class="h5 text-white mb-1">{{ house.name }}</h4>
                             <small class="text-muted">Créée le : {{ house.created_at|date:"d M. Y à H:i" }}</small>
                         </div>
-                        <a href="{% url 'house_detail' house.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Gérer</a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'download_house_qr_code' house.id %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Télécharger QR Code">&#9633; QR</a>
+                            <a href="{% url 'house_detail' house.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Gérer</a>
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -186,4 +189,21 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+// Animated counters
+document.querySelectorAll('.metric-value[data-target]').forEach(el => {
+    const target = parseInt(el.dataset.target, 10);
+    if (target === 0) { el.textContent = '0'; return; }
+    let start = 0;
+    const step = target / (1200 / 16);
+    const timer = setInterval(() => {
+        start += step;
+        if (start >= target) { el.textContent = target; clearInterval(timer); }
+        else { el.textContent = Math.floor(start); }
+    }, 16);
+});
+</script>
 {% endblock %}

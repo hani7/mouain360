@@ -4,17 +4,39 @@
 
 {% block content %}
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-5">
+  <!-- Header + Controls -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div>
-      <h1 class="display-5 fw-bold mb-2" style="color: var(--primary);">Listings</h1>
-      <p class="text-muted mb-0">Explorez nos propriétés virtuelles</p>
+      <h1 class="display-5 fw-bold mb-1" style="color: var(--primary);">Mes Propriétés</h1>
+      <p class="text-muted mb-0">Gérez vos visites virtuelles 360°</p>
+    </div>
+    <a href="{% url 'create_house' %}" class="btn btn-primary px-4 rounded-pill">+ Nouvelle propriété</a>
+  </div>
+
+  <!-- Search + Toggle -->
+  <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+    <div style="flex:1;min-width:200px;position:relative;">
+      <input type="text" id="searchInput" placeholder="Rechercher une propriété..."
+        style="width:100%;padding:0.7rem 1rem 0.7rem 2.8rem;background:rgba(255,255,255,0.05);border:1.5px solid rgba(1,238,254,0.2);border-radius:50px;color:#e5e9ee;font-size:0.9rem;outline:none;transition:border-color 0.2s;"
+        oninput="filterHouses()" onfocus="this.style.borderColor='#01eefe'" onblur="this.style.borderColor='rgba(1,238,254,0.2)'">
+      <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:rgba(229,233,238,0.4);font-size:1rem;">&#128269;</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button id="btnGrid" onclick="setView('grid')" title="Vue grille"
+        style="padding:0.6rem 0.9rem;border-radius:8px;border:1.5px solid rgba(1,238,254,0.3);background:rgba(1,238,254,0.1);color:#01eefe;cursor:pointer;transition:all 0.2s;">
+        &#9638;
+      </button>
+      <button id="btnList" onclick="setView('list')" title="Vue liste"
+        style="padding:0.6rem 0.9rem;border-radius:8px;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:rgba(229,233,238,0.5);cursor:pointer;transition:all 0.2s;">
+        &#9776;
+      </button>
     </div>
   </div>
   
   {% if houses %}
-  <div class="row g-4">
+  <div id="housesGrid" class="row g-4">
     {% for house in houses %}
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-lg-4 house-card" data-name="{{ house.name|lower }}">
       <div class="luxury-card">
         <div class="luxury-card-image">
           {% if house.floor_plan_image %}
@@ -365,4 +387,52 @@ function showToast(message) {
     }
 }
 </style>
+{% endblock %}
+
+{% block script %}
+<script>
+function filterHouses() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    document.querySelectorAll('.house-card').forEach(card => {
+        const name = card.dataset.name || '';
+        card.style.display = name.includes(q) ? '' : 'none';
+    });
+}
+
+function setView(mode) {
+    const grid = document.getElementById('housesGrid');
+    const btnGrid = document.getElementById('btnGrid');
+    const btnList = document.getElementById('btnList');
+    if (mode === 'list') {
+        grid.classList.remove('row-cols-md-2', 'row-cols-lg-3');
+        document.querySelectorAll('.house-card').forEach(c => {
+            c.className = 'col-12 house-card';
+            const inner = c.querySelector('.luxury-card');
+            if (inner) { inner.style.display = 'flex'; inner.style.flexDirection = 'row'; inner.style.gap = '1rem'; }
+            const img = c.querySelector('.luxury-card-image');
+            if (img) { img.style.width = '160px'; img.style.flexShrink = '0'; }
+        });
+        btnList.style.background = 'rgba(1,238,254,0.1)';
+        btnList.style.color = '#01eefe';
+        btnList.style.borderColor = 'rgba(1,238,254,0.3)';
+        btnGrid.style.background = 'transparent';
+        btnGrid.style.color = 'rgba(229,233,238,0.5)';
+        btnGrid.style.borderColor = 'rgba(255,255,255,0.1)';
+    } else {
+        document.querySelectorAll('.house-card').forEach(c => {
+            c.className = 'col-md-6 col-lg-4 house-card';
+            const inner = c.querySelector('.luxury-card');
+            if (inner) { inner.style.display = ''; inner.style.flexDirection = ''; }
+            const img = c.querySelector('.luxury-card-image');
+            if (img) { img.style.width = ''; img.style.flexShrink = ''; }
+        });
+        btnGrid.style.background = 'rgba(1,238,254,0.1)';
+        btnGrid.style.color = '#01eefe';
+        btnGrid.style.borderColor = 'rgba(1,238,254,0.3)';
+        btnList.style.background = 'transparent';
+        btnList.style.color = 'rgba(229,233,238,0.5)';
+        btnList.style.borderColor = 'rgba(255,255,255,0.1)';
+    }
+}
+</script>
 {% endblock %}

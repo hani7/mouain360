@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 
 class Image(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='standalone_images', null=True, blank=True)
@@ -16,6 +17,7 @@ class House(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     floor_plan_image = models.ImageField(upload_to='floor_plans/', blank=True, null=True)
+    share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -18,7 +18,7 @@
     <style>
         :root {
             --primary: #01eefe;
-            --dark: #212529;
+            --dark: #0d1117;
             --light: #e5e9ee;
             --primary-dark: #00bfcc;
             --primary-light: #4df3ff;
@@ -492,6 +492,54 @@
             color: var(--primary);
             margin-bottom: 1rem;
         }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .m360-toast {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.9rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 280px;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            animation: toastIn 0.4s cubic-bezier(.175,.885,.32,1.275) forwards;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .m360-toast-success {
+            background: rgba(0,255,136,0.12);
+            border: 1px solid rgba(0,255,136,0.35);
+            color: #00ff88;
+        }
+        .m360-toast-danger, .m360-toast-error {
+            background: rgba(255,107,107,0.12);
+            border: 1px solid rgba(255,107,107,0.35);
+            color: #ff6b6b;
+        }
+        .m360-toast-info {
+            background: rgba(1,238,254,0.1);
+            border: 1px solid rgba(1,238,254,0.3);
+            color: var(--primary);
+        }
+        .m360-toast-warning {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.3);
+            color: #ffc107;
+        }
+        .toast-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        @keyframes toastIn {
+            from { opacity:0; transform: translateX(60px) scale(0.85); }
+            to   { opacity:1; transform: translateX(0)   scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity:1; transform: translateX(0) scale(1); }
+            to   { opacity:0; transform: translateX(60px) scale(0.85); }
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -560,6 +608,22 @@
         {% endblock %}
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.6rem;">
+        {% for message in messages %}
+        <div class="m360-toast m360-toast-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="alert">
+            <span class="toast-icon">
+                {% if message.tags == 'success' %}✓{% elif message.tags == 'error' or message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:1.1rem;padding:0 0 0 0.5rem;opacity:0.6;">×</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Animated particle canvas -->
+    <canvas id="particles-canvas" style="position:fixed;top:0;left:0;z-index:-1;pointer-events:none;"></canvas>
+
     <!-- Footer -->
     <footer>
         <p>© 2025 Mouain 360 — Tous droits réservés</p>
@@ -569,8 +633,81 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
-    {% block script %}
-    <!-- Child template scripts -->
-    {% endblock %}
+    <script>
+    // ===== PARTICLE BACKGROUND =====
+    (function() {
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resize();
+        window.addEventListener('resize', resize);
+        for (let i = 0; i < 55; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 1.5 + 0.3,
+                dx: (Math.random() - 0.5) * 0.4,
+                dy: (Math.random() - 0.5) * 0.4,
+                alpha: Math.random() * 0.5 + 0.1
+            });
+        }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(1,238,254,${p.alpha})`;
+                ctx.fill();
+                p.x += p.dx; p.y += p.dy;
+                if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+            });
+            // draw connecting lines
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i+1; j < particles.length; j++) {
+                    const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(1,238,254,${0.06 * (1 - dist/120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
+    // ===== PAGE TRANSITION FADE-IN =====
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.35s ease';
+    window.addEventListener('load', () => { document.body.style.opacity = '1'; });
+    document.querySelectorAll('a[href]').forEach(a => {
+        if (a.href && !a.href.startsWith('#') && a.target !== '_blank' && a.getAttribute('href') && !a.getAttribute('href').startsWith('#')) {
+            a.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href && !href.startsWith('javascript') && !href.startsWith('mailto')) {
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    setTimeout(() => { window.location.href = href; }, 300);
+                }
+            });
+        }
+    });
+
+    // ===== AUTO-DISMISS TOASTS =====
+    document.querySelectorAll('.m360-toast').forEach(t => {
+        setTimeout(() => {
+            t.style.animation = 'toastOut 0.4s ease forwards';
+            setTimeout(() => t.remove(), 400);
+        }, 4000);
+    });
+    </script>
+
+    {% block script %}{% endblock %}
 </body>
 </html>
