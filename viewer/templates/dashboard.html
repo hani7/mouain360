@@ -85,6 +85,19 @@
     .activity-item:last-child {
         border-bottom: none;
     }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .metric-value { font-size: 2.5rem; }
+        .metric-label { font-size: 0.85rem; letter-spacing: 1px; }
+        .metric-card  { padding: 1.2rem; }
+        .action-card  { padding: 1rem; }
+        .action-icon  { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .activity-item { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+        .activity-item a { width: 100%; text-align: center; }
+        h1.display-4 { font-size: 1.8rem; }
+        p.fs-5 { font-size: 0.95rem !important; }
+    }
 </style>
 
 <div class="container py-4">
