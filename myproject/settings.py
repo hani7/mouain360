@@ -150,4 +150,5 @@ DEFAULT_FROM_EMAIL = 'Mouain 360 <noreply@mouin360.com>'
 
 # For testing in development without valid credentials
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
