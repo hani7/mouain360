@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Espace Super Admin - Mouin 360{% endblock %}
+
+{% block content %}
+<style>
+    .admin-card {
+        background: rgba(13, 17, 23, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(1, 238, 254, 0.2);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        transition: transform 0.3s;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .admin-card:hover { transform: translateY(-5px); border-color: rgba(1, 238, 254, 0.5); }
+    .stat-number { font-size: 3rem; font-weight: 800; color: #01eefe; line-height: 1; margin-bottom: 10px; }
+    .stat-label { font-size: 0.9rem; color: rgba(229,233,238,0.7); text-transform: uppercase; letter-spacing: 1px; }
+    
+    .table-container {
+        background: rgba(13, 17, 23, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(1, 238, 254, 0.15);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 30px;
+    }
+    .table { margin-bottom: 0; color: #e5e9ee; }
+    .table thead th {
+        background: rgba(1, 238, 254, 0.05);
+        border-bottom: 2px solid rgba(1, 238, 254, 0.2);
+        color: #01eefe;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 15px;
+    }
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .table tbody tr:hover { background: rgba(1, 238, 254, 0.03); }
+    
+    .badge-admin { background: rgba(1, 238, 254, 0.2); color: #01eefe; border: 1px solid #01eefe; }
+    .badge-active { background: rgba(0, 255, 136, 0.2); color: #00ff88; border: 1px solid #00ff88; }
+    .badge-inactive { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; }
+    
+    .action-btn { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-delete { background: rgba(255, 107, 107, 0.1); color: #ff6b6b; border: 1px solid #ff6b6b; }
+    .btn-delete:hover { background: #ff6b6b; color: white; }
+</style>
+
+<div class="content-container">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold" style="color: white;">👑 Tableau de bord <span style="color:var(--primary)">Super Admin</span></h1>
+            <p style="color: rgba(229,233,238,0.7); font-size: 1.1rem;">Supervision globale et gestion des utilisateurs.</p>
+        </div>
+    </div>
+
+    <!-- Statistiques globales -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="admin-card">
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Utilisateurs inscrits</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="admin-card">
+                <div class="stat-number">{{ total_houses }}</div>
+                <div class="stat-label">Maisons Virtuelles</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="admin-card">
+                <div class="stat-number">{{ total_floor_plans }}</div>
+                <div class="stat-label">Plans d'étage générés</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des Utilisateurs -->
+    <h3 class="fw-bold mb-3" style="color: white;">Liste des Utilisateurs</h3>
+    <div class="table-responsive table-container">
+        <table class="table table-borderless">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Statut</th>
+                    <th>Date d'inscription</th>
+                    <th class="text-center">Propriétés (360°)</th>
+                    <th class="text-center">Plans 2D</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target_user in users %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--primary);">
+                                {{ target_user.username|make_list|first|upper }}
+                            </div>
+                            <span class="fw-bold">{{ target_user.username }}</span>
+                            {% if target_user.is_superuser %}
+                                <span class="badge badge-admin rounded-pill ms-2" style="font-size:0.7rem;">Admin</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="color: rgba(229,233,238,0.7);">{{ target_user.email }}</td>
+                    <td>
+                        {% if target_user.is_active %}
+                            <span class="badge badge-active rounded-pill">Vérifié</span>
+                        {% else %}
+                            <span class="badge badge-inactive rounded-pill">Non vérifié</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: rgba(229,233,238,0.7);">{{ target_user.date_joined|date:"d M Y" }}</td>
+                    <td class="text-center fw-bold" style="color: #01eefe;">{{ target_user.house_count }}</td>
+                    <td class="text-center fw-bold" style="color: #01eefe;">{{ target_user.floor_plan_count }}</td>
+                    <td class="text-end">
+                        {% if not target_user.is_superuser %}
+                        <form method="post" action="{% url 'superadmin_delete_user' target_user.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ target_user.username }} et toutes ses propriétés ? Cette action est irréversible.');" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn btn-delete">✕ Supprimer</button>
+                        </form>
+                        {% else %}
+                        <span style="color: rgba(229,233,238,0.4); font-size: 0.8rem; font-style: italic;">Intouchable</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4" style="color: rgba(229,233,238,0.5);">Aucun utilisateur trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

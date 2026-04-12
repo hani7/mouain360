@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Count
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -172,3 +173,39 @@ def profile_view(request):
         'floorplan_count': floorplan_count,
     }
     return render(request, 'accounts/profile.html', context)
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_dashboard(request):
+    """Tableau de bord personnalisé pour les super admins (Suivi global)"""
+    from viewer.models import House
+    from floor_plan.models import FloorPlan
+    
+    users = User.objects.annotate(
+        house_count=Count('houses', distinct=True),
+        floor_plan_count=Count('floor_plans', distinct=True)
+    ).order_by('-date_joined')
+    
+    total_users = User.objects.count()
+    total_houses = House.objects.count()
+    total_floor_plans = FloorPlan.objects.count()
+    
+    return render(request, 'accounts/superadmin_dashboard.html', {
+        'users': users,
+        'total_users': total_users,
+        'total_houses': total_houses,
+        'total_floor_plans': total_floor_plans,
+    })
+
+@user_passes_test(lambda u: u.is_superuser)
+def superadmin_delete_user(request, user_id):
+    """Supprimer un compte utilisateur et ses données associées"""
+    if request.method == 'POST':
+        user_to_delete = User.objects.get(id=user_id)
+        if not user_to_delete.is_superuser:  # Protect fellow admins
+            username = user_to_delete.username
+            user_to_delete.delete()
+            messages.success(request, f"L'utilisateur {username} a été supprimé définitivement.")
+        else:
+            messages.error(request, "Impossible de supprimer un compte Super Administrateur via cette interface.")
+            
+    return redirect('superadmin_dashboard')

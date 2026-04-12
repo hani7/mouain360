@@ -11,6 +11,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     
+    # Super Admin Dashboard
+    path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
+    path('superadmin/delete-user/<int:user_id>/', views.superadmin_delete_user, name='superadmin_delete_user'),
+    
     # Password Reset
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='accounts/password_reset_form.html',
