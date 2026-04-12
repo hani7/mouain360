@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
+        .email-container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .email-header { background-color: #0d1117; padding: 30px 20px; text-align: center; border-bottom: 3px solid #01eefe; }
+        .email-header img { max-height: 45px; }
+        .email-body { padding: 40px 30px; color: #333333; line-height: 1.6; font-size: 16px; }
+        .email-footer { background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 13px; color: #888888; border-top: 1px solid #eeeeee; }
+        .btn { display: inline-block; padding: 12px 28px; background-color: #01eefe; color: #0d1117 !important; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px; }
+        .highlight { font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #0d1117; background-color: #e5fbfc; padding: 10px 20px; border-radius: 8px; display: inline-block; margin: 20px 0; border: 1px solid #01eefe; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <!-- Replace with absolute URL to your logo when hosted -->
+            <img src="https://app.mouin360.com/static/images/logo.png" alt="Mouin 360">
+        </div>
+        <div class="email-body">
+            {% block content %}{% endblock %}
+            <p>À bientôt,<br><strong>L'équipe Mouin 360</strong></p>
+        </div>
+        <div class="email-footer">
+            © 2025 Mouin 360. Tous droits réservés.<br>
+            Si vous n'avez pas demandé ceci, vous pouvez ignorer cet e-mail.
+        </div>
+    </div>
+</body>
+</html>

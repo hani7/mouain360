@@ -1,0 +1,13 @@
+{% extends "accounts/emails/email_base.html" %}
+
+{% block content %}
+<p>Bonjour <strong>{{ user.username }}</strong>,</p>
+
+<p>Merci de vous être inscrit sur Mouin 360 ! Pour valider votre inscription et finaliser la création de votre compte, veuillez utiliser le code de vérification suivant :</p>
+
+<div style="text-align: center;">
+    <div class="highlight">{{ otp_code }}</div>
+</div>
+
+<p>Ce code est strictement confidentiel. Veuillez ne pas le partager.</p>
+{% endblock %}

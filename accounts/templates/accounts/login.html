@@ -257,7 +257,7 @@
                        placeholder="Votre mot de passe" required>
             </div>
             <div style="text-align:right; margin-bottom: 1.8rem; margin-top: 0.5rem;">
-                <a href="#" onclick="alert('Veuillez contacter le support pour réinitialiser votre mot de passe.'); return false;" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 500;">Mot de passe oublié ?</a>
+                <a href="{% url 'password_reset' %}" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 500;">Mot de passe oublié ?</a>
             </div>
             <button type="submit" class="btn-submit">Se connecter →</button>
         </form>
