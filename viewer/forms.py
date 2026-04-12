@@ -11,7 +11,7 @@ class HouseForm(forms.ModelForm):
         model = House
         fields = ['name', 'description', 'floor_plan_image']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter house description...'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Entrez la description de la maison...'}),
         }
 
 class RoomForm(forms.ModelForm):
@@ -19,7 +19,7 @@ class RoomForm(forms.ModelForm):
         model = Room
         fields = ['title', 'image', 'is_starting_point']
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'e.g., Living Room, Kitchen, Bedroom'}),
+            'title': forms.TextInput(attrs={'placeholder': 'Ex: Salon, Cuisine, Chambre'}),
         }
 
 class RoomConnectionForm(forms.ModelForm):
@@ -29,5 +29,5 @@ class RoomConnectionForm(forms.ModelForm):
         widgets = {
             'pitch': forms.HiddenInput(),
             'yaw': forms.HiddenInput(),
-            'label': forms.TextInput(attrs={'placeholder': 'e.g., Go to Kitchen'}),
+            'label': forms.TextInput(attrs={'placeholder': 'Ex: Aller à la Cuisine'}),
         }

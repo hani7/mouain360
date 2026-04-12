@@ -11,11 +11,11 @@ class FloorPlanAttachmentForm(forms.ModelForm):
         model = FloorPlanAttachment
         fields = ['label', 'file']
         labels = {
-            'label': 'Attachment Label/Description',
-            'file': 'Select File',
+            'label': 'Description de la pièce jointe',
+            'file': 'Sélectionner le fichier',
         }
         widgets = {
-            'label': forms.TextInput(attrs={'placeholder': 'e.g., Floor Plan PDF, Technical Drawing, etc.', 'required': True}),
+            'label': forms.TextInput(attrs={'placeholder': "Ex: Plan d'étage PDF, Dessin technique, etc.", 'required': True}),
             'file': forms.FileInput(attrs={'accept': '*/*', 'required': True}),
         }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ house.name }} - Virtual Walkthrough</title>
+    <title>{{ house.name }} - Visite Virtuelle</title>
     
     <!-- Pannellum CSS -->
     <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
@@ -218,8 +218,8 @@
             <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
         </div>
         <div class="controls">
-            <a href="{% url 'house_detail' house.id %}" class="btn">⚙️ Manage</a>
-            <a href="{% url 'house_list' %}" class="btn btn-exit">✕ Exit</a>
+            <a href="{% url 'house_detail' house.id %}" class="btn">⚙️ Gérer</a>
+            <a href="{% url 'house_list' %}" class="btn btn-exit">✕ Quitter</a>
         </div>
     </div>
     
@@ -228,16 +228,16 @@
     <div id="panorama"></div>
     {% else %}
     <div class="no-rooms">
-        <h2>No Rooms Available</h2>
-        <p>Add 360° room images to start the walkthrough</p>
-        <a href="{% url 'house_detail' house.id %}" class="btn" style="margin-top: 20px;">Add Rooms</a>
+        <h2>Aucune pièce disponible</h2>
+        <p>Ajoutez des images 360° de pièces pour démarrer la visite</p>
+        <a href="{% url 'house_detail' house.id %}" class="btn" style="margin-top: 20px;">Ajouter des pièces</a>
     </div>
     {% endif %}
     
     <!-- Floor Plan Mini Map -->
     {% if house.floor_plan_image %}
     <div class="floor-plan-overlay">
-        <h3>📐 Floor Plan</h3>
+        <h3>📐 Plan d'Étage</h3>
         <div style="position: relative;">
             <img src="{{ house.floor_plan_image.url }}" alt="Floor Plan" class="floor-plan-mini">
             <div class="current-marker" id="current-marker" style="display: none;"></div>
@@ -247,7 +247,7 @@
     
     <!-- Room List -->
     <div class="room-list">
-        <h3>Rooms ({{ rooms.count }})</h3>
+        <h3>Pièces ({{ rooms.count }})</h3>
         {% for room in rooms %}
         <div class="room-list-item" 
              onclick="loadScene('room_{{ room.id }}')"

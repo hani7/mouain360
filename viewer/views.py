@@ -1,6 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
 import json
 
 from viewer.utils import generate_qr_code
@@ -9,6 +10,7 @@ from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm
 
 # ===== Original Image Viewer Views =====
 
+@login_required
 def upload_image(request):
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)
@@ -19,19 +21,23 @@ def upload_image(request):
         form = ImageUploadForm()
     return render(request, 'upload.html', {'form': form})
 
+@login_required
 def view_images(request):
     images = Image.objects.all()
     return render(request, 'view_images.html', {'images': images})
 
+@login_required
 def view_360_image(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     return render(request, 'view_360_image.html', {'image': image})
 
+@login_required
 def delete_image(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     image.delete()
     return redirect('view_images')
 
+@login_required
 def download_qr_code(request, image_id):
     """Generates the QR code for a given image and allows the user to download it."""
     image = get_object_or_404(Image, id=image_id)
@@ -41,6 +47,7 @@ def download_qr_code(request, image_id):
     response['Content-Disposition'] = f'attachment; filename="qr_code_{image_id}.png"'
     return response
 
+@login_required
 def download_house_qr_code(request, house_id):
     """Generates QR code for house walkthrough URL"""
     house = get_object_or_404(House, id=house_id)
@@ -52,11 +59,13 @@ def download_house_qr_code(request, house_id):
 
 # ===== House Walkthrough Views =====
 
+@login_required
 def house_list(request):
     """List all houses with virtual walkthroughs"""
     houses = House.objects.all()
     return render(request, 'house_list.html', {'houses': houses})
 
+@login_required
 def create_house(request):
     """Create a new house"""
     if request.method == 'POST':
@@ -68,6 +77,7 @@ def create_house(request):
         form = HouseForm()
     return render(request, 'create_house.html', {'form': form})
 
+@login_required
 def house_detail(request, house_id):
     """Manage rooms and connections for a house"""
     house = get_object_or_404(House, id=house_id)
@@ -77,6 +87,7 @@ def house_detail(request, house_id):
         'rooms': rooms
     })
 
+@login_required
 def add_room(request, house_id):
     """Add a new 360° room image to a house"""
     house = get_object_or_404(House, id=house_id)
@@ -96,6 +107,7 @@ def add_room(request, house_id):
         form = RoomForm()
     return render(request, 'add_room.html', {'form': form, 'house': house})
 
+@login_required
 def edit_room_position(request, room_id):
     """Edit room position on floor plan"""
     room = get_object_or_404(Room, id=room_id)
@@ -109,6 +121,7 @@ def edit_room_position(request, room_id):
     
     return JsonResponse({'status': 'error'}, status=400)
 
+@login_required
 def add_connection(request, room_id):
     """Add a hotspot connection from one room to another"""
     from_room = get_object_or_404(Room, id=room_id)
@@ -137,6 +150,7 @@ def add_connection(request, room_id):
         'available_rooms': available_rooms
     })
 
+@login_required
 def delete_room(request, room_id):
     """Delete a room"""
     room = get_object_or_404(Room, id=room_id)
@@ -144,6 +158,7 @@ def delete_room(request, room_id):
     room.delete()
     return redirect('house_detail', house_id=house_id)
 
+@login_required
 def house_walkthrough(request, house_id):
     """Main walkthrough viewer with Pannellum"""
     house = get_object_or_404(House, id=house_id)

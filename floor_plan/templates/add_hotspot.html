@@ -1,6 +1,6 @@
-<h2>Add Hotspot for {{ floorplan.title }}</h2>
+<h2>Ajouter un point chaud pour {{ floorplan.title }}</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Add Hotspot</button>
+    <button type="submit">Ajouter un point chaud</button>
 </form>

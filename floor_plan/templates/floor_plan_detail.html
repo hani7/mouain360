@@ -154,9 +154,9 @@
   <body>
     <h2>{{ floorplan.title }}</h2>
 
-    <button class="btn" onclick="copyLink()">📋 Copy Share Link</button>
+    <button class="btn" onclick="copyLink()">📋 Copier le lien de partage</button>
     <a class="btn" href="{% url 'add_hotspot' floorplan.pk %}"
-      >➕ Add Hotspot</a
+      >➕ Ajouter un point chaud</a
     >
 
     <div id="floor-plan-wrapper">
@@ -181,12 +181,12 @@
 
     <!-- File Upload Section -->
     <div class="upload-section">
-      <h3>📎 Attachments</h3>
+      <h3>📎 Pièces jointes</h3>
       
       <!-- List of existing attachments -->
       {% if floorplan.attachments.all %}
       <div class="attachments-list">
-        <h4>Uploaded Files:</h4>
+        <h4>Fichiers téléversés :</h4>
         {% for attachment in floorplan.attachments.all %}
         <div class="attachment-item">
           <span class="file-icon">📄</span>
@@ -204,7 +204,7 @@
       {% endif %}
 
       <!-- Upload new file form -->
-      <h4>Add New File:</h4>
+      <h4>Ajouter un nouveau fichier :</h4>
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div>
@@ -215,7 +215,7 @@
           <label for="id_file">{{ attachment_form.file.label }}:</label><br>
           {{ attachment_form.file }}
         </div>
-        <button type="submit" name="upload_attachment">Upload File</button>
+        <button type="submit" name="upload_attachment">Téléverser le fichier</button>
       </form>
     </div>
 
@@ -254,7 +254,7 @@
             body: JSON.stringify({ x_percent: x, y_percent: y }),
           }).then((response) => {
             if (!response.ok) {
-              alert("Failed to update hotspot position.");
+              alert("Échec de la mise à jour de la position du point chaud.");
             }
           });
         });
@@ -270,7 +270,7 @@
         dummy.select();
         document.execCommand("copy");
         document.body.removeChild(dummy);
-        alert("Link copied to clipboard!");
+        alert("Lien copié dans le presse-papiers !");
       }
     </script>
   </body>

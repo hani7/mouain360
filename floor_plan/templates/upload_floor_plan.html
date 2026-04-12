@@ -1,5 +1,5 @@
 {% extends "base2.html" %}
-{% block title %}Upload Floor Plan{% endblock %}
+{% block title %}Téléverser un Plan d'Étage{% endblock %}
 
 {% block content %}
 <div class="upload-container">
@@ -10,7 +10,7 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="upload-btn">
-            <i class="fas fa-cloud-upload-alt"></i> Upload
+            <i class="fas fa-cloud-upload-alt"></i> Téléverser
         </button>
     </form>
 </div>

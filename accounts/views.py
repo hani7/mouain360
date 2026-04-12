@@ -40,11 +40,11 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
+            messages.success(request, f'Bon retour, {user.username} !')
             next_url = request.GET.get('next', 'house_list')
             return redirect(next_url)
         else:
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'Nom d\'utilisateur ou mot de passe invalide.')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -52,5 +52,5 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    messages.info(request, 'You have been logged out.')
+    messages.info(request, 'Vous avez été déconnecté.')
     return redirect('login')
