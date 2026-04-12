@@ -43,8 +43,7 @@ def register_view(request):
                 send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
                 messages.info(request, 'Un code de vérification a été envoyé à votre adresse e-mail.')
             except Exception as e:
-                messages.error(request, f"Erreur lors de l'envoi de l'e-mail : {str(e)[:100]}")
-                print(e)
+                messages.error(request, f"Nous n'avons pas pu envoyer l'email. Veuillez réessayer plus tard.")
             
             # Save user in session to verify
             request.session['registration_user_id'] = user.id
@@ -104,8 +103,7 @@ def resend_otp_view(request):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
         messages.success(request, 'Un nouveau code a été envoyé à votre adresse e-mail.')
     except Exception as e:
-        messages.error(request, f"Erreur lors de l'envoi de l'e-mail : {str(e)[:100]}")
-        print(e)
+        messages.error(request, f"Nous n'avons pas pu envoyer l'email. Veuillez réessayer plus tard.")
         
     return redirect('verify_otp')
 

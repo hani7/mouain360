@@ -139,11 +139,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email Configuration
+# Email Configuration for cPanel Server
+# On cPanel, connecting to 'localhost' port 25 is often required to bypass the internal firewall
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.mouin360.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = False
 EMAIL_HOST_USER = 'noreply@mouin360.com'
 EMAIL_HOST_PASSWORD = 'Mohamed2026++' # Fill in your password
 DEFAULT_FROM_EMAIL = 'Mouain 360 <noreply@mouin360.com>'
