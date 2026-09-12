@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('calendar/', views.calendar_view, name='calendar'),
     
     # Original image viewer URLs
     path('upload/', views.upload_image, name='upload_image'),

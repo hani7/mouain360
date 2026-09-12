@@ -37,17 +37,14 @@
                 <li class="nav-item {% if request.resolver_match.url_name == 'house_list' %}active{% endif %}">
                     <a href="{% url 'house_list' %}"><i data-lucide="folder"></i> Mes missions</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#"><i data-lucide="calendar"></i> Calendrier</a>
+                <li class="nav-item {% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">
+                    <a href="{% url 'calendar' %}"><i data-lucide="calendar"></i> Calendrier</a>
                 </li>
                 <li class="nav-item">
                     <a href="#"><i data-lucide="bell"></i> Notifications</a>
                 </li>
                 <li class="nav-item">
                     <a href="#"><i data-lucide="share-2"></i> Partages</a>
-                </li>
-                <li class="nav-item {% if request.resolver_match.url_name == 'floor_plan_list' %}active{% endif %}">
-                    <a href="{% url 'floor_plan_list' %}"><i data-lucide="layout"></i> Modèles</a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'profile' %}"><i data-lucide="settings"></i> Paramètres</a>

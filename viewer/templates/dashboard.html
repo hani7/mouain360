@@ -10,7 +10,7 @@
     </div>
     <div class="header-actions">
         <button class="top-icon-btn"><i data-lucide="bell"></i> Notifications</button>
-        <button class="top-icon-btn"><i data-lucide="user"></i> Profil</button>
+        <a href="{% url 'profile' %}" class="top-icon-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;"><i data-lucide="user"></i> Profil</a>
         <button class="top-icon-btn"><i data-lucide="settings"></i> Paramètres</button>
         <a href="{% url 'create_house' %}" class="btn-primary">
             <i data-lucide="plus"></i> NOUVELLE MISSION

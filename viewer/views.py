@@ -57,6 +57,29 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
+@login_required
+def calendar_view(request):
+    """View for displaying missions in a calendar"""
+    houses = House.objects.filter(owner=request.user)
+    
+    # We will pass the houses to the template, and let JS render them on a calendar
+    # We serialize the relevant data to JSON so FullCalendar (or custom JS) can read it
+    events = []
+    for house in houses:
+        if house.created_at:
+            events.append({
+                'title': house.name,
+                'start': house.created_at.strftime('%Y-%m-%d'),
+                'url': f'/viewer/house/{house.id}/',
+                'color': '#01edfe', # primary color
+                'textColor': '#000000',
+            })
+            
+    context = {
+        'events_json': json.dumps(events)
+    }
+    return render(request, 'calendar.html', context)
+
 # ===== Original Image Viewer Views =====
 
 @login_required
@@ -350,6 +373,8 @@ def house_walkthrough(request, house_id):
     
     return render(request, 'house_walkthrough.html', {
         'house': house,
+        'rooms': rooms,
+        'starting_room': starting_room,
         'scenes_json': json.dumps(scenes),
         'default_scene': f'room_{starting_room.id}' if starting_room else None
     })
@@ -385,6 +410,8 @@ def public_walkthrough(request, share_token):
         
     return render(request, 'public_walkthrough.html', {
         'house': house,
+        'rooms': rooms,
+        'starting_room': starting_room,
         'scenes_json': json.dumps(scenes),
         'default_scene': f'room_{starting_room.id}' if starting_room else None
     })

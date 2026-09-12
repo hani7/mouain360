@@ -1,0 +1,124 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Mouin 360 - Calendrier{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<style>
+    .calendar-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        margin-top: 2rem;
+    }
+
+    .fc {
+        color: var(--text-color);
+    }
+
+    .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
+        border-color: var(--border-color);
+    }
+
+    .fc-col-header-cell {
+        background-color: rgba(255, 255, 255, 0.02);
+        padding: 10px 0;
+    }
+
+    .fc-daygrid-day.fc-day-today {
+        background-color: rgba(1, 237, 254, 0.1) !important;
+    }
+
+    .fc-button-primary {
+        background-color: var(--panel-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-color) !important;
+        text-transform: capitalize;
+    }
+
+    .fc-button-primary:hover {
+        background-color: rgba(1, 237, 254, 0.1) !important;
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+    }
+
+    .fc-button-active {
+        background-color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        color: #000 !important;
+    }
+
+    .fc-event {
+        border: none !important;
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .fc-event:hover {
+        transform: scale(1.02);
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-actions">
+    <div>
+        <h1 class="page-title">Calendrier des Missions</h1>
+        <p class="page-subtitle">Visualisez vos missions et échéances</p>
+    </div>
+    <a href="{% url 'create_house' %}" class="btn btn-primary">
+        <i data-lucide="plus"></i> NOUVELLE MISSION
+    </a>
+</div>
+
+<div class="calendar-container">
+    <div id='calendar'></div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        // Parse events from Django context
+        var eventsData = {{ events_json|safe }};
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: eventsData,
+            eventClick: function(info) {
+                if (info.event.url) {
+                    window.location.href = info.event.url;
+                    info.jsEvent.preventDefault(); // prevents browser from following link in current tab.
+                }
+            },
+            height: 'auto',
+            dayMaxEvents: true
+        });
+        
+        calendar.render();
+    });
+</script>
+{% endblock %}
