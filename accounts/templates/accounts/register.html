@@ -4,66 +4,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S'inscrire — Mouin 360</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
-    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <title>S'inscrire - Mouin 360</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/login_modern.css' %}">
 </head>
-<body data-panorama="{% static 'images/auth_bg_360_modern_compressed.jpg' %}">
-    <!-- Left branding panel -->
-    <div class="auth-left">
-        <div id="panorama"></div>
-        <img src="{% static 'images/logo.png' %}" alt="Mouin 360" class="brand-logo">
-        <p class="brand-sub">La plateforme premium pour des visites virtuelles immersives de propriétés. Créez, partagez et explorez des espaces comme jamais auparavant.</p>
+<body style="background-image: url('{% static 'images/auth_bg_new.jpg' %}');">
+    
+    <div class="bg-overlay"></div>
+
+    <div class="login-wrapper">
+        <!-- LEFT PANEL -->
+        <div class="login-left">
+            <div class="brand-header" style="display: flex; align-items: center; margin-bottom: 3rem;">
+                <img src="{% static 'images/logo-360.png' %}" alt="Mouin 360 Logo" style="height: 45px; margin-right: 15px;">
+            </div>
+            
+            <h1 class="brand-title">La plateforme de<br>structuration spatiale<br>et temporelle du réel.</h1>
+            <p class="brand-subtitle">Une technologie immersive au service<br>des professionnels du réel.</p>
+
+            <div class="domain-icons">
+                <div class="domain-item">
+                    <i data-lucide="building-2"></i>
+                    <span>Architecture<br>& Chantier</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="scale"></i>
+                    <span>Expertise<br>judiciaire</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="user-check"></i>
+                    <span>Huissier de<br>justice</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="home"></i>
+                    <span>Immobilier</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="map"></i>
+                    <span>Tourisme</span>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li>
+                    <div class="feature-icon"><i data-lucide="video" style="width: 16px; height: 16px;"></i></div>
+                    Capture & visite immersive à 360°
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="map" style="width: 16px; height: 16px;"></i></div>
+                    Structuration spatiale sur plans interactifs
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="clock" style="width: 16px; height: 16px;"></i></div>
+                    Suivi temporel & comparaison des états
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="share-2" style="width: 16px; height: 16px;"></i></div>
+                    Documentation, traçabilité & partage
+                </li>
+            </ul>
+        </div>
+
+        <!-- RIGHT PANEL (FORM) -->
+        <div class="login-right">
+            <div class="glass-card">
+                <h2 class="auth-title">Créer un compte</h2>
+                <p class="auth-subtitle">Démarrez votre essai gratuit</p>
+
+                {% if messages %}
+                <div class="messages-list">
+                    {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input class="form-input" type="text" name="username" id="id_username"
+                               placeholder="Nom d'utilisateur" maxlength="150" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <i data-lucide="mail" class="input-icon"></i>
+                        <input class="form-input" type="email" name="email" id="id_email"
+                               placeholder="Adresse e-mail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input class="form-input" type="password" name="password1" id="id_password1"
+                               placeholder="Mot de passe" required>
+                        <i data-lucide="eye" class="eye-icon" id="togglePassword1"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input class="form-input" type="password" name="password2" id="id_password2"
+                               placeholder="Confirmer le mot de passe" required>
+                        <i data-lucide="eye" class="eye-icon" id="togglePassword2"></i>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" style="margin-top: 2rem;">
+                        S'INSCRIRE <i data-lucide="arrow-right" class="arrow-icon"></i>
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Vous avez déjà un compte ? 
+                    <a href="{% url 'login' %}">Se connecter</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Right Panel: Auth Form -->
-    <div class="auth-right">
-        <img src="{% static 'images/logo.png' %}" alt="Mouin 360" class="logo-mobile-only" style="max-height: 50px; margin-bottom: 20px; align-self: flex-start;">
-        <h1 class="auth-title">Créer un Compte</h1>
-        <p class="auth-subtitle">Démarrez votre essai gratuit — aucune carte requise</p>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-        {% if messages %}
-        <div class="messages-list">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        // Password visibility toggles
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggleBtn = document.querySelector(toggleId);
+            const inputField = document.querySelector(inputId);
+            
+            if(toggleBtn && inputField) {
+                toggleBtn.addEventListener('click', function (e) {
+                    const type = inputField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    inputField.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        this.setAttribute('data-lucide', 'eye');
+                    } else {
+                        this.setAttribute('data-lucide', 'eye-off');
+                    }
+                    lucide.createIcons();
+                });
+            }
+        }
 
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label" for="id_username">Nom d'utilisateur</label>
-                <input class="form-input" type="text" name="username" id="id_username"
-                       placeholder="Choisissez un nom d'utilisateur" maxlength="150" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="id_email">Adresse e-mail</label>
-                <input class="form-input" type="email" name="email" id="id_email"
-                       placeholder="votre@email.com" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="id_password1">Mot de passe</label>
-                <input class="form-input" type="password" name="password1" id="id_password1"
-                       placeholder="Créez un mot de passe sécurisé" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="id_password2">Confirmer le mot de passe</label>
-                <input class="form-input" type="password" name="password2" id="id_password2"
-                       placeholder="Répétez votre mot de passe" required>
-                <p style="font-size: 0.8rem; color: rgba(229,233,238,0.4); margin-top: 0.4rem;">8 caractères minimum.</p>
-            </div>
-            <button type="submit" class="btn-submit">Créer le compte →</button>
-        </form>
-
-        <div class="auth-footer">
-            Vous avez déjà un compte ? <a href="{% url 'login' %}">Se connecter</a>
-        </div>
-    </div>
-
-    <!-- Pannellum JS -->
-    <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
-    <script src="{% static 'js/auth.js' %}"></script>
+        setupPasswordToggle('#togglePassword1', '#id_password1');
+        setupPasswordToggle('#togglePassword2', '#id_password2');
+    </script>
 </body>
 </html>

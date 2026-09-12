@@ -18,7 +18,9 @@ urlpatterns = [
     # House walkthrough URLs
     path('houses/', views.house_list, name='house_list'),
     path('house/create/', views.create_house, name='create_house'),
+    path('house/<int:house_id>/edit/', views.edit_house, name='edit_house'),
     path('house/<int:house_id>/', views.house_detail, name='house_detail'),
+    path('house/<int:house_id>/delete/', views.delete_house, name='delete_house'),
     path('house/<int:house_id>/add-room/', views.add_room, name='add_room'),
     path('house/<int:house_id>/walkthrough/', views.house_walkthrough, name='house_walkthrough'),
     path('house/<int:house_id>/qr-code/', views.download_house_qr_code, name='download_house_qr_code'),

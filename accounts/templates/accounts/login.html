@@ -4,62 +4,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion — Mouin 360</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
-    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <title>Connexion - Mouin 360</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/login_modern.css' %}">
 </head>
-<body data-panorama="{% static 'images/auth_bg_360_modern_compressed.jpg' %}">
-    <div class="auth-left">
-        <div id="panorama"></div>
-        <img src="{% static 'images/logo.png' %}" alt="Mouin 360" class="brand-logo">
-        <p class="brand-sub">Votre plateforme de visites virtuelles de propriétés. Connectez-vous pour gérer vos visites 360°.</p>
-        <ul class="feature-list">
-            <li>Visites virtuelles 360° illimitées</li>
-            <li>Navigation interactive sur plan d'étage</li>
-            <li>Partage par QR code pour chaque propriété</li>
-            <li>Connexions point chaud entre les pièces</li>
-        </ul>
+<body style="background-image: url('{% static 'images/auth_bg_new.jpg' %}');">
+    
+    <div class="bg-overlay"></div>
+
+    <div class="login-wrapper">
+        <!-- LEFT PANEL -->
+        <div class="login-left">
+            <div class="brand-header" style="display: flex; align-items: center; margin-bottom: 3rem;">
+                <img src="{% static 'images/logo-360.png' %}" alt="Mouin 360 Logo" style="height: 45px; margin-right: 15px;">
+            </div>
+            
+            <h1 class="brand-title">La plateforme de<br>structuration spatiale<br>et temporelle du réel.</h1>
+            <p class="brand-subtitle">Une technologie immersive au service<br>des professionnels du réel.</p>
+
+            <div class="domain-icons">
+                <div class="domain-item">
+                    <i data-lucide="building-2"></i>
+                    <span>Architecture<br>& Chantier</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="scale"></i>
+                    <span>Expertise<br>judiciaire</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="user-check"></i>
+                    <span>Huissier de<br>justice</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="home"></i>
+                    <span>Immobilier</span>
+                </div>
+                <div class="domain-item">
+                    <i data-lucide="map"></i>
+                    <span>Tourisme</span>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li>
+                    <div class="feature-icon"><i data-lucide="video" style="width: 16px; height: 16px;"></i></div>
+                    Capture & visite immersive à 360°
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="map" style="width: 16px; height: 16px;"></i></div>
+                    Structuration spatiale sur plans interactifs
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="clock" style="width: 16px; height: 16px;"></i></div>
+                    Suivi temporel & comparaison des états
+                </li>
+                <li>
+                    <div class="feature-icon"><i data-lucide="share-2" style="width: 16px; height: 16px;"></i></div>
+                    Documentation, traçabilité & partage
+                </li>
+            </ul>
+        </div>
+
+        <!-- RIGHT PANEL (FORM) -->
+        <div class="login-right">
+            <div class="glass-card">
+                <h2 class="auth-title">Bienvenue</h2>
+                <p class="auth-subtitle">Connectez-vous à votre compte MOUIN 360</p>
+
+                {% if messages %}
+                <div class="messages-list">
+                    {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input class="form-input" type="text" name="username" id="id_username"
+                               placeholder="Nom d'utilisateur" required autofocus>
+                    </div>
+                    
+                    <div class="form-group">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input class="form-input" type="password" name="password" id="id_password"
+                               placeholder="Mot de passe" required>
+                        <i data-lucide="eye" class="eye-icon" id="togglePassword"></i>
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        SE CONNECTER <i data-lucide="arrow-right" class="arrow-icon"></i>
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Vous n'avez pas encore de compte ? 
+                    <a href="{% url 'register' %}">Créer un compte</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="auth-right">
-        <img src="{% static 'images/logo.png' %}" alt="Mouin 360" class="logo-mobile-only" style="max-height: 50px; margin-bottom: 20px; align-self: flex-start;">
-        <h1 class="auth-title">Bienvenue</h1>
-        <p class="auth-subtitle">Connectez-vous à votre compte Mouin 360</p>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-        {% if messages %}
-        <div class="messages-list">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        // Password visibility toggle
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#id_password');
 
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label" for="id_username">Nom d'utilisateur</label>
-                <input class="form-input" type="text" name="username" id="id_username"
-                       placeholder="Votre nom d'utilisateur" required autofocus>
-            </div>
-            <div class="form-group mb-2">
-                <label class="form-label" for="id_password">Mot de passe</label>
-                <input class="form-input" type="password" name="password" id="id_password"
-                       placeholder="Votre mot de passe" required>
-            </div>
-            <div style="text-align:right; margin-bottom: 1.8rem; margin-top: 0.5rem;">
-                <a href="{% url 'password_reset' %}" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 500;">Mot de passe oublié ?</a>
-            </div>
-            <button type="submit" class="btn-submit">Se connecter →</button>
-        </form>
-
-        <div class="auth-footer">
-            Pas encore de compte ? <a href="{% url 'register' %}">Créer un compte gratuit</a>
-        </div>
-    </div>
-
-    <!-- Pannellum JS -->
-    <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
-    <script src="{% static 'js/auth.js' %}"></script>
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Toggle icon (eye / eye-off)
+            if (type === 'password') {
+                this.setAttribute('data-lucide', 'eye');
+            } else {
+                this.setAttribute('data-lucide', 'eye-off');
+            }
+            lucide.createIcons(); // re-render the icon
+        });
+    </script>
 </body>
 </html>

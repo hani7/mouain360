@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mouin 360 - Tableau de bord{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Dashboard Main CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard_modern.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="{% static 'images/logo-360.png' %}" alt="Mouin 360">
+                <h2>MOUIN <span>360</span></h2>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}"><i data-lucide="layout-dashboard"></i> Tableau de bord</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'house_list' %}active{% endif %}">
+                    <a href="{% url 'house_list' %}"><i data-lucide="folder"></i> Mes missions</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i data-lucide="calendar"></i> Calendrier</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i data-lucide="bell"></i> Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i data-lucide="share-2"></i> Partages</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'floor_plan_list' %}active{% endif %}">
+                    <a href="{% url 'floor_plan_list' %}"><i data-lucide="layout"></i> Modèles</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'profile' %}"><i data-lucide="settings"></i> Paramètres</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i data-lucide="help-circle"></i> Aide</a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-sm" onclick="window.location.href='{% url 'logout' %}'" title="Se déconnecter">
+                    <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+                    <div class="info">
+                        <strong>{{ user.username }}</strong>
+                        <span>Expert judiciaire</span>
+                    </div>
+                    <i data-lucide="chevron-down" style="width:16px; color:var(--text-muted);"></i>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            {% block content %}
+            <!-- Dashboard content injected here -->
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- Initialize Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block script %}{% endblock %}
+</body>
+</html>

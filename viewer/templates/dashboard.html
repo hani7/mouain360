@@ -1,209 +1,192 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_base.html' %}
 {% load static %}
 
-{% block title %}Tableau de bord - Mouain 360{% endblock %}
-
 {% block content %}
-<style>
-    /* Metric Cards */
-    .metric-card {
-        background: rgba(13, 17, 23, 0.4);
-        border: 1px solid rgba(1, 238, 254, 0.1);
-        border-radius: 20px;
-        padding: 2rem;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        text-align: center;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .metric-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(1, 238, 254, 0.3);
-        box-shadow: 0 10px 30px rgba(1, 238, 254, 0.1);
-    }
-    .metric-value {
-        font-size: 3.5rem;
-        font-weight: 800;
-        color: var(--primary, #01eefe);
-        margin-bottom: 0.5rem;
-        text-shadow: 0 0 20px rgba(1, 238, 254, 0.5);
-    }
-    .metric-label {
-        font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.8);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 600;
-    }
-    
-    /* Action Buttons */
-    .action-card {
-        background: rgba(1, 238, 254, 0.05);
-        border: 1px dashed rgba(1, 238, 254, 0.3);
-        border-radius: 15px;
-        padding: 1.5rem;
-        text-align: center;
-        color: #fff;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: block;
-    }
-    .action-card:hover {
-        background: rgba(1, 238, 254, 0.1);
-        border-style: solid;
-        color: var(--primary, #01eefe);
-        transform: translateY(-3px);
-    }
-    .action-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-    
-    /* Listed Activity */
-    .activity-list {
-        background: rgba(13, 17, 23, 0.6);
-        border-radius: 15px;
-        border: 1px solid rgba(255,255,255,0.05);
-        overflow: hidden;
-    }
-    .activity-item {
-        padding: 1.5rem;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: background 0.2s;
-    }
-    .activity-item:hover {
-        background: rgba(1, 238, 254, 0.03);
-    }
-    .activity-item:last-child {
-        border-bottom: none;
-    }
+<!-- HEADER -->
+<div class="top-header">
+    <div class="header-titles">
+        <h1>Bonjour {{ user.username }},</h1>
+        <p>Voici la situation de vos missions. &nbsp;&nbsp;&nbsp; <span style="color:var(--text-main);">3 missions nécessitent votre attention cette semaine.</span></p>
+    </div>
+    <div class="header-actions">
+        <button class="top-icon-btn"><i data-lucide="bell"></i> Notifications</button>
+        <button class="top-icon-btn"><i data-lucide="user"></i> Profil</button>
+        <button class="top-icon-btn"><i data-lucide="settings"></i> Paramètres</button>
+        <a href="{% url 'create_house' %}" class="btn-primary">
+            <i data-lucide="plus"></i> NOUVELLE MISSION
+        </a>
+    </div>
+</div>
 
-    /* Mobile responsiveness */
-    @media (max-width: 768px) {
-        .metric-value { font-size: 2.5rem; }
-        .metric-label { font-size: 0.85rem; letter-spacing: 1px; }
-        .metric-card  { padding: 1.2rem; }
-        .action-card  { padding: 1rem; }
-        .action-icon  { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .activity-item { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
-        .activity-item a { width: 100%; text-align: center; }
-        h1.display-4 { font-size: 1.8rem; }
-        p.fs-5 { font-size: 0.95rem !important; }
-    }
-</style>
+<!-- METRICS -->
+<div class="metric-cards-container">
+    <div class="m-card">
+        <h3 style="color: #fff;">{{ house_count_in_progress|stringformat:"02d" }}</h3>
+        <p>MISSIONS EN COURS</p>
+        <a href="{% url 'house_list' %}">Voir toutes &rarr;</a>
+    </div>
+    <div class="m-card">
+        <h3 style="color: #fff;">{{ house_count_near_deadline|stringformat:"02d" }}</h3>
+        <p>ÉCHÉANCES PROCHES</p>
+        <a href="#">Voir toutes &rarr;</a>
+    </div>
+    <div class="m-card">
+        <h3 style="color: #fff;">{{ house_count_late|stringformat:"02d" }}</h3>
+        <p>EN RETARD</p>
+        <a href="#">Voir toutes &rarr;</a>
+    </div>
+    <div class="m-card">
+        <h3 style="color: #fff;">{{ house_count_completed|stringformat:"02d" }}</h3>
+        <p>MISSIONS ACHEVÉES</p>
+        <a href="#">Voir toutes &rarr;</a>
+    </div>
+</div>
 
-<div class="container py-4">
-    <!-- Header -->
-    <div class="row mb-5 align-items-center">
-        <div class="col-12">
-            <h1 class="display-4 fw-bold mb-2" style="color: white;">
-                Bonjour, <span style="color: var(--primary, #01eefe);">{{ user.username }}</span> 👋
-            </h1>
-            <p class="text-muted fs-5">Bienvenue sur votre espace de gestion de visites virtuelles 360°.</p>
+<!-- MIDDLE GRID -->
+<div class="middle-grid">
+    <!-- ALERTS -->
+    <div class="alerts-card">
+        <div class="section-title">
+            <i data-lucide="alert-triangle" style="width:16px;color:var(--danger);"></i> MOUIN VOUS ALERTE
         </div>
+        
+        {% if alerts %}
+            {% for alert in alerts %}
+            <div class="alert-item">
+                <div class="alert-icon {% if alert.deadline < today %}danger{% else %}warning{% endif %}">
+                    <i data-lucide="{% if alert.deadline < today %}alert-circle{% else %}shield-alert{% endif %}"></i>
+                </div>
+                <div class="alert-info">
+                    <h4>{{ alert.name }}</h4>
+                    <p>
+                        {% if alert.deadline < today %}
+                            En retard depuis {{ alert.deadline|timesince }}
+                        {% else %}
+                            Échéance dans {{ alert.deadline|timeuntil }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="padding: 1rem; color: rgba(229,233,238,0.5); font-size: 0.9rem;">
+                Aucune alerte pour le moment.
+            </div>
+        {% endif %}
     </div>
 
-    <!-- Metrics Row -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="metric-card">
-                <div class="metric-value" data-target="{{ house_count }}">0</div>
-                <div class="metric-label">Propriétés</div>
+    <!-- PROJECTS TABLE -->
+    <div class="projects-card">
+        <div class="table-header-filters">
+            <div class="section-title mb-0" style="color: #fff;">MES MISSIONS</div>
+            <div class="tabs">
+                <div class="tab active">Toutes</div>
+                <div class="tab">En cours</div>
+                <div class="tab">Échéances proches</div>
+                <div class="tab">En retard</div>
+                <div class="tab">Achevées</div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="metric-card">
-                <div class="metric-value" data-target="{{ room_count }}">0</div>
-                <div class="metric-label">Pièces 360°</div>
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Rechercher une mission...">
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="metric-card">
-                <div class="metric-value" data-target="{{ floorplan_count }}">0</div>
-                <div class="metric-label">Plans 2D</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actions & Recent Activity -->
-    <div class="row g-5">
-        <!-- Quick Actions -->
-        <div class="col-lg-4">
-            <h3 class="h4 mb-4 text-white">Actions Rapides</h3>
-            
-            <a href="{% url 'create_house' %}" class="action-card mb-3">
-                <span class="action-icon">🏠</span>
-                <strong class="d-block">Créer une Propriété</strong>
-                <small class="text-muted">Démarrez une nouvelle visite virtuelle</small>
-            </a>
-            
-            <a href="{% url 'house_list' %}" class="action-card mb-3">
-                <span class="action-icon">🖼️</span>
-                <strong class="d-block">Gérer mes Visites</strong>
-                <small class="text-muted">Éditez vos propriétés existantes</small>
-            </a>
-
-            <a href="{% url 'floor_plan_list' %}" class="action-card">
-                <span class="action-icon">📍</span>
-                <strong class="d-block">Vos Plans 2D</strong>
-                <small class="text-muted">Cartes et repères interactifs</small>
-            </a>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="h4 text-white mb-0">Créations Récentes</h3>
-                <a href="{% url 'house_list' %}" class="text-primary text-decoration-none">Voir tout &rarr;</a>
-            </div>
-            
-            <div class="activity-list">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>MISSION</th>
+                    <th>RÉFÉRENCE</th>
+                    <th>TYPE DE MISSION</th>
+                    <th>CRÉATION</th>
+                    <th>ÉCHÉANCE</th>
+                    <th>STATUT</th>
+                    <th>ALERTE</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% if recent_houses %}
                     {% for house in recent_houses %}
-                    <div class="activity-item">
-                        <div>
-                            <h4 class="h5 text-white mb-1">{{ house.name }}</h4>
-                            <small class="text-muted">Créée le : {{ house.created_at|date:"d M. Y à H:i" }}</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'download_house_qr_code' house.id %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Télécharger QR Code">&#9633; QR</a>
-                            <a href="{% url 'house_detail' house.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Gérer</a>
-                        </div>
-                    </div>
+                    <tr>
+                        <td style="color:#fff; font-weight:500;">{{ house.name }}</td>
+                        <td>{{ house.reference|default:"--" }}</td>
+                        <td>{{ house.mission_type }}</td>
+                        <td>{{ house.created_at|date:"d/m/Y" }}</td>
+                        <td>{{ house.deadline|date:"d/m/Y"|default:"--" }}</td>
+                        <td><span class="status-badge">{{ house.status }}</span></td>
+                        <td>
+                            {% if house.deadline and house.status != 'Achevé' %}
+                                {% if house.deadline < today %}
+                                    <span style="color:var(--danger);">En retard</span>
+                                {% else %}
+                                    Dans {{ house.deadline|timeuntil }}
+                                {% endif %}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                        <td><a href="{% url 'house_detail' house.id %}" class="action-link">OUVRIR &rarr;</a></td>
+                    </tr>
                     {% endfor %}
                 {% else %}
-                    <div class="p-5 text-center text-muted">
-                        <p class="mb-0 fs-5">Aucune propriété créée pour le moment.</p>
-                        <p>Commencez en utilisant le bouton "Créer une Propriété".</p>
-                    </div>
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding: 2rem;">
+                            Aucune mission pour le moment.
+                        </td>
+                    </tr>
                 {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="bottom-grid">
+    <!-- RECENT ACTIVITY -->
+    <div class="activity-card">
+        <div class="section-title">ACTIVITÉ RÉCENTE</div>
+        
+        {% if recent_rooms %}
+            {% for room in recent_rooms %}
+            <div class="activity-item">
+                <div class="activity-icon"><i data-lucide="image"></i></div>
+                <div class="activity-info">
+                    <p><strong>Pièce ajoutée : {{ room.title }}</strong> — {{ room.house.name }}</p>
+                    <small>Il y a {{ room.uploaded_at|timesince }}</small>
+                </div>
             </div>
+            {% endfor %}
+        {% else %}
+            <div style="padding: 1rem; color: rgba(229,233,238,0.5); font-size: 0.9rem;">
+                Aucune activité récente.
+            </div>
+        {% endif %}
+        
+        <a href="#" class="view-all-link">Voir toute l'activité &rarr;</a>
+    </div>
+
+    <!-- RESUME WORK -->
+    <div class="resume-card">
+        <div class="section-title">REPRENDRE MON DERNIER TRAVAIL</div>
+        
+        <div class="resume-content">
+            {% if recent_houses %}
+                <!-- Use actual data if available -->
+                <div class="resume-thumb" style="background-image: url('{% if recent_houses.first.floor_plan_image %}{{ recent_houses.first.floor_plan_image.url }}{% endif %}'); background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05);"></div>
+                <div class="resume-info">
+                    <h4>{{ recent_houses.first.name }}</h4>
+                    <p>Créé il y a {{ recent_houses.first.created_at|timesince }}</p>
+                    <a href="{% url 'house_detail' recent_houses.first.id %}" class="btn-outline">CONTINUER &rarr;</a>
+                </div>
+            {% else %}
+                <div class="resume-info" style="width: 100%; text-align: center; padding: 2rem 0;">
+                    <p style="color: rgba(229,233,238,0.5);">Vous n'avez pas encore de mission.</p>
+                    <a href="{% url 'create_house' %}" class="btn-outline" style="margin-top: 1rem; display: inline-block;">CRÉER UNE MISSION &rarr;</a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block script %}
-<script>
-// Animated counters
-document.querySelectorAll('.metric-value[data-target]').forEach(el => {
-    const target = parseInt(el.dataset.target, 10);
-    if (target === 0) { el.textContent = '0'; return; }
-    let start = 0;
-    const step = target / (1200 / 16);
-    const timer = setInterval(() => {
-        start += step;
-        if (start >= target) { el.textContent = target; clearInterval(timer); }
-        else { el.textContent = Math.floor(start); }
-    }, 16);
-});
-</script>
 {% endblock %}

@@ -1,49 +1,48 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_base.html' %}
 
-{% block title %}Maisons Virtuelles - Mouain 360{% endblock %}
+{% block title %}Mes Missions - Mouain 360{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="mission-page-container">
   <!-- Header + Controls -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div class="header-section">
     <div>
-      <h1 class="display-5 fw-bold mb-1" style="color: var(--primary);">Mes Propriétés</h1>
-      <p class="text-muted mb-0">Gérez vos visites virtuelles 360°</p>
+      <h1 class="page-title">Mes Missions</h1>
+      <p class="page-subtitle">Gérez vos missions et visites virtuelles</p>
     </div>
-    <a href="{% url 'create_house' %}" class="btn btn-primary px-4 rounded-pill">+ Nouvelle propriété</a>
+    <a href="{% url 'create_house' %}" class="btn-primary-neon">
+      <i data-lucide="plus" style="width:16px; margin-right:8px;"></i> NOUVELLE MISSION
+    </a>
   </div>
 
   <!-- Search + Toggle -->
-  <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
-    <div style="flex:1;min-width:200px;position:relative;">
-      <input type="text" id="searchInput" placeholder="Rechercher une propriété..."
-        style="width:100%;padding:0.7rem 1rem 0.7rem 2.8rem;background:rgba(255,255,255,0.05);border:1.5px solid rgba(1,238,254,0.2);border-radius:50px;color:#e5e9ee;font-size:0.9rem;outline:none;transition:border-color 0.2s;"
-        oninput="filterHouses()" onfocus="this.style.borderColor='#01eefe'" onblur="this.style.borderColor='rgba(1,238,254,0.2)'">
-      <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:rgba(229,233,238,0.4);font-size:1rem;">&#128269;</span>
+  <!-- Search + Toggle -->
+  <div class="controls-section">
+    <div class="search-wrapper">
+      <i data-lucide="search" class="search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Rechercher une mission..." class="search-input" oninput="filterHouses()">
     </div>
-    <div class="d-flex gap-2">
-      <button id="btnGrid" onclick="setView('grid')" title="Vue grille"
-        style="padding:0.6rem 0.9rem;border-radius:8px;border:1.5px solid rgba(1,238,254,0.3);background:rgba(1,238,254,0.1);color:#01eefe;cursor:pointer;transition:all 0.2s;">
-        &#9638;
+    <div class="view-toggles">
+      <button id="btnGrid" onclick="setView('grid')" title="Vue grille" class="toggle-btn active">
+        <i data-lucide="layout-grid" style="width: 18px;"></i>
       </button>
-      <button id="btnList" onclick="setView('list')" title="Vue liste"
-        style="padding:0.6rem 0.9rem;border-radius:8px;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:rgba(229,233,238,0.5);cursor:pointer;transition:all 0.2s;">
-        &#9776;
+      <button id="btnList" onclick="setView('list')" title="Vue liste" class="toggle-btn">
+        <i data-lucide="list" style="width: 18px;"></i>
       </button>
     </div>
   </div>
   
   {% if houses %}
-  <div id="housesGrid" class="row g-4">
+  <div id="housesGrid" class="missions-grid">
     {% for house in houses %}
-    <div class="col-md-6 col-lg-4 house-card" data-name="{{ house.name|lower }}">
+    <div class="house-card" data-name="{{ house.name|lower }}">
       <div class="luxury-card">
         <div class="luxury-card-image">
           {% if house.floor_plan_image %}
           <img src="{{ house.floor_plan_image.url }}" alt="{{ house.name }}">
           {% else %}
           <div class="placeholder-image">
-            <span>🏠</span>
+            <i data-lucide="folder-open" style="width: 64px; height: 64px; color: rgba(255,255,255,0.2);"></i>
           </div>
           {% endif %}
           
@@ -80,14 +79,20 @@
           
           <div class="luxury-card-footer">
             <button onclick="copyHouseLink('{{ house.id }}')" class="icon-btn" title="Partager">
-              🔗
+              <i data-lucide="share-2" style="width:16px;"></i>
             </button>
             <a href="{% url 'download_house_qr_code' house.id %}" class="icon-btn" title="QR Code">
-              📱
+              <i data-lucide="qr-code" style="width:16px;"></i>
             </a>
             <a href="{% url 'house_detail' house.id %}" class="icon-btn" title="Gérer">
-              ⚙️
+              <i data-lucide="settings" style="width:16px;"></i>
             </a>
+            <form method="POST" action="{% url 'delete_house' house.id %}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission et toutes ses données (images, plans) ?');">
+              {% csrf_token %}
+              <button type="submit" class="icon-btn icon-btn-danger" title="Supprimer">
+                <i data-lucide="trash-2" style="width:16px;"></i>
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -95,28 +100,143 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="card text-center empty-state">
-    <div class="card-body py-5">
-      <div class="mb-4" style="font-size: 5rem; opacity: 0.3;">🏠</div>
-      <h3 class="mb-3">Aucune maison disponible</h3>
-      <p class="text-muted mb-4">Créez votre première visite virtuelle immersive!</p>
-      <a href="{% url 'create_house' %}" class="luxury-btn luxury-btn-primary btn-lg">
-        Créer une Maison
-      </a>
-    </div>
+  <div class="empty-state">
+    <i data-lucide="folder-open" style="width: 80px; height: 80px; color: rgba(255,255,255,0.1); margin-bottom: 1.5rem;"></i>
+    <h3>Aucune mission disponible</h3>
+    <p>Créez votre première mission pour commencer à gérer vos données.</p>
+    <a href="{% url 'create_house' %}" class="btn-primary-neon" style="margin-top: 1.5rem; display: inline-block;">
+      NOUVELLE MISSION
+    </a>
   </div>
   {% endif %}
 </div>
 
-<!-- Floating Add Button -->
-<a href="{% url 'create_house' %}" class="floating-add-btn" title="Nouvelle Maison">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-</a>
+</div>
 
 <style>
+/* Page Layout */
+.mission-page-container {
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  color: #e5e9ee;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.page-subtitle {
+  color: rgba(229,233,238,0.6);
+  margin: 0;
+}
+
+.btn-primary-neon {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.btn-primary-neon:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 10px rgba(1, 237, 254, 0.4);
+}
+
+.controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(229,233,238,0.4);
+  width: 18px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.7rem 1rem 0.7rem 2.8rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #e5e9ee;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+  background: rgba(0,0,0,0.3);
+}
+
+.view-toggles {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toggle-btn {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: rgba(229,233,238,0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn.active {
+  background: rgba(1, 237, 254, 0.1);
+  color: var(--primary);
+  border-color: rgba(1, 237, 254, 0.3);
+}
+
+/* Grid Layout */
+.missions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 /* Luxury Card Design */
 .luxury-card {
   background: rgba(255, 255, 255, 0.03);
@@ -271,12 +391,26 @@
   transition: all 0.3s ease;
   text-decoration: none;
   font-size: 1rem;
+  color: #fff;
 }
 
 .icon-btn:hover {
   background: rgba(1, 238, 254, 0.2);
   border-color: var(--primary);
   transform: translateY(-2px);
+  color: #fff;
+}
+
+.icon-btn-danger {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  color: #ff4757;
+}
+
+.icon-btn-danger:hover {
+  background: rgba(255, 71, 87, 0.2);
+  border-color: #ff4757;
+  color: #ff4757;
 }
 
 /* Floating Add Button */
@@ -403,35 +537,45 @@ function setView(mode) {
     const grid = document.getElementById('housesGrid');
     const btnGrid = document.getElementById('btnGrid');
     const btnList = document.getElementById('btnList');
+    
     if (mode === 'list') {
-        grid.classList.remove('row-cols-md-2', 'row-cols-lg-3');
+        grid.className = 'missions-list';
         document.querySelectorAll('.house-card').forEach(c => {
-            c.className = 'col-12 house-card';
             const inner = c.querySelector('.luxury-card');
-            if (inner) { inner.style.display = 'flex'; inner.style.flexDirection = 'row'; inner.style.gap = '1rem'; }
+            if (inner) { 
+                inner.style.display = 'flex'; 
+                inner.style.flexDirection = 'row'; 
+                inner.style.gap = '1.5rem'; 
+            }
             const img = c.querySelector('.luxury-card-image');
-            if (img) { img.style.width = '160px'; img.style.flexShrink = '0'; }
+            if (img) { 
+                img.style.width = '250px'; 
+                img.style.height = '100%';
+                img.style.flexShrink = '0'; 
+            }
         });
-        btnList.style.background = 'rgba(1,238,254,0.1)';
-        btnList.style.color = '#01eefe';
-        btnList.style.borderColor = 'rgba(1,238,254,0.3)';
-        btnGrid.style.background = 'transparent';
-        btnGrid.style.color = 'rgba(229,233,238,0.5)';
-        btnGrid.style.borderColor = 'rgba(255,255,255,0.1)';
+        
+        btnList.classList.add('active');
+        btnGrid.classList.remove('active');
     } else {
+        grid.className = 'missions-grid';
         document.querySelectorAll('.house-card').forEach(c => {
-            c.className = 'col-md-6 col-lg-4 house-card';
             const inner = c.querySelector('.luxury-card');
-            if (inner) { inner.style.display = ''; inner.style.flexDirection = ''; }
+            if (inner) { 
+                inner.style.display = ''; 
+                inner.style.flexDirection = ''; 
+                inner.style.gap = '';
+            }
             const img = c.querySelector('.luxury-card-image');
-            if (img) { img.style.width = ''; img.style.flexShrink = ''; }
+            if (img) { 
+                img.style.width = '';
+                img.style.height = '260px';
+                img.style.flexShrink = ''; 
+            }
         });
-        btnGrid.style.background = 'rgba(1,238,254,0.1)';
-        btnGrid.style.color = '#01eefe';
-        btnGrid.style.borderColor = 'rgba(1,238,254,0.3)';
-        btnList.style.background = 'transparent';
-        btnList.style.color = 'rgba(229,233,238,0.5)';
-        btnList.style.borderColor = 'rgba(255,255,255,0.1)';
+        
+        btnGrid.classList.add('active');
+        btnList.classList.remove('active');
     }
 }
 </script>

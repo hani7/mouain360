@@ -1,154 +1,236 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Connection from {{ room.title }}{% endblock %}
+{% block title %}Ajouter une connexion depuis {{ room.title }}{% endblock %}
 
 {% block content %}
 <style>
-  .container {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 20px;
+  .mission-page {
+      max-width: 1400px;
+      margin: 3rem auto;
+      padding: 0 2rem;
   }
   
-  .viewer-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
+  .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+  }
+  
+  @media (max-width: 1024px) {
+      .layout-grid {
+          grid-template-columns: 1fr;
+      }
+  }
+
+  .card-panel {
+      background: rgba(10, 15, 25, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+  
+  .panel-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
   }
   
   #panorama {
-    width: 100%;
-    height: 500px;
-    border-radius: 4px;
-  }
-  
-  .form-section {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 600px;
-    margin: 0 auto;
+      width: 100%;
+      height: 500px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
   }
   
   .form-group {
-    margin-bottom: 20px;
+      margin-bottom: 1.5rem;
   }
   
   .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
+      display: block;
+      color: rgba(229,233,238,0.7);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
   }
   
   .form-group select,
   .form-group input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      transition: all 0.3s ease;
   }
   
-  .btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
+  .form-group select option {
+      background: #0a0f19;
+      color: #fff;
   }
   
-  .btn-primary {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background-color: #45a049;
-  }
-  
-  .btn-secondary {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #bbb;
+  .form-group select:focus,
+  .form-group input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 2px rgba(1, 237, 254, 0.2);
   }
   
   .help-text {
-    font-size: 12px;
-    color: #777;
-    margin-top: 5px;
+      font-size: 0.75rem;
+      color: rgba(229,233,238,0.5);
+      margin-top: 0.4rem;
   }
   
   .instructions {
-    background: #e3f2fd;
-    padding: 15px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+      background: rgba(1, 237, 254, 0.05);
+      border: 1px solid rgba(1, 237, 254, 0.2);
+      color: #e5e9ee;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
   }
   
   .form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+  }
+  
+  .btn-outline:hover {
+      background: rgba(255,255,255,0.05);
+  }
+  
+  .btn-primary-neon {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.3s;
+      box-shadow: 0 0 15px rgba(1, 237, 254, 0.4);
+  }
+  
+  .btn-primary-neon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(1, 237, 254, 0.6);
+  }
+  
+  .position-badge {
+      display: inline-block;
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--primary);
+      font-family: monospace;
+      font-size: 0.9rem;
   }
 </style>
 
 <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
 
-<div class="container">
-  <h1>🔗 Add Connection from "{{ room.title }}"</h1>
-  
-  <div class="viewer-section">
-    <h3>Step 1: Click where you want the hotspot</h3>
-    <div class="instructions">
-      <strong>Instructions:</strong> Click anywhere in the 360° view below to set the hotspot position. 
-      This is where users will click to navigate to another room (e.g., a doorway, hallway entrance).
-    </div>
-    <div id="panorama"></div>
+<div class="mission-page">
+  <div style="margin-bottom: 2rem;">
+      <h1 style="margin:0; font-size: 1.8rem; display:flex; align-items:center; gap:0.8rem;">
+          <i data-lucide="link" style="color:var(--primary); width:28px; height:28px;"></i>
+          Créer un lien depuis "{{ room.title }}"
+      </h1>
   </div>
   
-  <div class="form-section">
-    <h3>Step 2: Configure the connection</h3>
-    
-    <form method="post" id="connection-form">
-      {% csrf_token %}
-      
-      <input type="hidden" name="pitch" id="id_pitch" value="0">
-      <input type="hidden" name="yaw" id="id_yaw" value="0">
-      
-      <div class="form-group">
-        <label for="id_to_room">Destination Room *</label>
-        {{ form.to_room }}
-        <div class="help-text">Where should this hotspot take you?</div>
+  <div class="layout-grid">
+      <!-- Left Column: Viewer -->
+      <div class="card-panel">
+          <h3 class="panel-title">
+              <span style="background:var(--primary); color:#000; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">1</span>
+              Cliquez pour placer le point
+          </h3>
+          <div class="instructions">
+              <i data-lucide="info" style="color:var(--primary); width:24px; flex-shrink:0;"></i>
+              <div>Cliquez n'importe où dans la vue 360° ci-dessous pour placer le point de navigation vers l'autre pièce (ex: sur une porte ou un couloir).</div>
+          </div>
+          <div id="panorama"></div>
       </div>
       
-      <div class="form-group">
-        <label for="id_label">Hotspot Label *</label>
-        {{ form.label }}
-        <div class="help-text">Text shown on the hotspot (e.g., "Go to Kitchen", "Exit to Hallway")</div>
+      <!-- Right Column: Form -->
+      <div class="card-panel">
+          <h3 class="panel-title">
+              <span style="background:var(--primary); color:#000; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">2</span>
+              Configurer le lien
+          </h3>
+          
+          <form method="post" id="connection-form">
+              {% csrf_token %}
+              
+              <input type="hidden" name="pitch" id="id_pitch" value="0">
+              <input type="hidden" name="yaw" id="id_yaw" value="0">
+              
+              <div class="form-group">
+                  <label for="id_to_room">Pièce de destination *</label>
+                  {{ form.to_room }}
+                  <div class="help-text">Où ce point doit-il mener l'utilisateur ?</div>
+              </div>
+              
+              <div class="form-group">
+                  <label for="id_label">Texte du point *</label>
+                  {{ form.label }}
+                  <div class="help-text">Texte affiché (ex: "Aller à la cuisine", "Sortie")</div>
+              </div>
+              
+              <div class="form-group">
+                  <label>Position du point</label>
+                  <div class="position-badge">
+                      Pitch: <span id="pitch-display">0.00</span>° | Yaw: <span id="yaw-display">0.00</span>°
+                  </div>
+                  <div class="help-text">Mis à jour automatiquement lorsque vous cliquez sur l'image à gauche.</div>
+              </div>
+              
+              <div class="form-actions">
+                  <a href="{% url 'house_detail' room.house.id %}" class="btn-outline">Annuler</a>
+                  <button type="submit" class="btn-primary-neon">Sauvegarder le lien</button>
+              </div>
+          </form>
       </div>
-      
-      <div class="form-group">
-        <label>Hotspot Position</label>
-        <div>
-          Pitch: <span id="pitch-display">0</span>° | 
-          Yaw: <span id="yaw-display">0</span>°
-        </div>
-        <div class="help-text">Click in the 360° view above to set this</div>
-      </div>
-      
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Connection</button>
-        <a href="{% url 'house_detail' room.house.id %}" class="btn btn-secondary">Cancel</a>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -181,8 +263,14 @@
       "pitch": pitch,
       "yaw": yaw,
       "type": "info",
-      "text": "New hotspot here"
+      "text": "Nouveau point"
     });
+  });
+  
+  // Add placeholder to input if possible
+  document.addEventListener('DOMContentLoaded', () => {
+      const labelInput = document.querySelector('input[name="label"]');
+      if(labelInput) labelInput.placeholder = "Ex: Cuisine";
   });
 </script>
 {% endblock %}

@@ -19,12 +19,50 @@ class House(models.Model):
     floor_plan_image = models.ImageField(upload_to='floor_plans/', blank=True, null=True)
     share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # New dashboard fields
+    reference = models.CharField(max_length=50, blank=True, null=True)
+    mission_type = models.CharField(max_length=100, default='Visite 360')
+    STATUS_CHOICES = [
+        ('En cours', 'En cours'),
+        ('Achevé', 'Achevé'),
+        ('En retard', 'En retard'),
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='En cours')
+    deadline = models.DateField(null=True, blank=True)
+
+    # Nouvelle Mission Fields
+    official_title = models.CharField(max_length=255, blank=True)
+    order_date = models.DateField(null=True, blank=True)
+    reception_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    client = models.CharField(max_length=200, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    wilaya = models.CharField(max_length=100, blank=True)
+    commune = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
         ordering = ['-created_at']
+
+class MissionParty(models.Model):
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='parties')
+    name = models.CharField(max_length=200)
+    role = models.CharField(max_length=100) # e.g., 'Demandeur', 'Entreprise', 'Autre'
+
+    def __str__(self):
+        return f"{self.name} ({self.role})"
+
+class MissionDocument(models.Model):
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='documents')
+    file = models.FileField(upload_to='mission_documents/')
+    name = models.CharField(max_length=255)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
 class Room(models.Model):
     """A single 360° image representing a room/location in a house"""

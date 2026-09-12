@@ -6,7 +6,7 @@ import json
 
 from viewer.utils import generate_qr_code
 from floor_plan.models import FloorPlan
-from .models import Image, House, Room, RoomConnection
+from .models import Image, House, Room, RoomConnection, MissionParty, MissionDocument
 from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm
 
 # ===== Dashboard View =====
@@ -14,19 +14,46 @@ from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm
 @login_required
 def dashboard(request):
     """Main dashboard showing user stats and recent activity."""
+    from datetime import date, timedelta
+    today = date.today()
+    next_week = today + timedelta(days=7)
+
     # Metrics
-    house_count = House.objects.filter(owner=request.user).count()
+    house_count_in_progress = House.objects.filter(owner=request.user, status='En cours').count()
+    house_count_completed = House.objects.filter(owner=request.user, status='Achevé').count()
+    house_count_late = House.objects.filter(owner=request.user, status='En retard').count()
+    house_count_near_deadline = House.objects.filter(
+        owner=request.user, 
+        deadline__gte=today, 
+        deadline__lte=next_week
+    ).count()
+    
     room_count = Room.objects.filter(house__owner=request.user).count()
     floorplan_count = FloorPlan.objects.filter(owner=request.user).count()
     
-    # Recent activity
-    recent_houses = House.objects.filter(owner=request.user).order_by('-created_at')[:3]
+    # Recent activity for table
+    recent_houses = House.objects.filter(owner=request.user).order_by('-created_at')[:5]
+    
+    # Alerts (projects near deadline or late)
+    alerts = House.objects.filter(
+        owner=request.user,
+        deadline__isnull=False
+    ).exclude(status='Achevé').order_by('deadline')[:3]
+
+    # Recent Activity Feed
+    recent_rooms = Room.objects.filter(house__owner=request.user).order_by('-uploaded_at')[:3]
     
     context = {
-        'house_count': house_count,
+        'house_count_in_progress': house_count_in_progress,
+        'house_count_completed': house_count_completed,
+        'house_count_late': house_count_late,
+        'house_count_near_deadline': house_count_near_deadline,
         'room_count': room_count,
         'floorplan_count': floorplan_count,
         'recent_houses': recent_houses,
+        'alerts': alerts,
+        'recent_rooms': recent_rooms,
+        'today': today,
     }
     return render(request, 'dashboard.html', context)
 
@@ -91,27 +118,131 @@ def house_list(request):
 
 @login_required
 def create_house(request):
-    """Create a new house"""
+    """Create a new mission (house)"""
     if request.method == 'POST':
-        form = HouseForm(request.POST, request.FILES)
-        if form.is_valid():
-            house = form.save(commit=False)
-            house.owner = request.user
+        # Create house
+        house = House(
+            owner=request.user,
+            name=request.POST.get('name', ''),
+            official_title=request.POST.get('official_title', ''),
+            reference=request.POST.get('reference', ''),
+            mission_type=request.POST.get('mission_type', 'Visite 360'),
+            order_date=request.POST.get('order_date') or None,
+            reception_date=request.POST.get('reception_date') or None,
+            start_date=request.POST.get('start_date') or None,
+            deadline=request.POST.get('deadline') or None,
+            client=request.POST.get('client', ''),
+            address=request.POST.get('address', ''),
+            wilaya=request.POST.get('wilaya', ''),
+            commune=request.POST.get('commune', '')
+        )
+        house.save()
+        
+        # Process parties
+        party_names = request.POST.getlist('party_name[]')
+        party_roles = request.POST.getlist('party_role[]')
+        for name, role in zip(party_names, party_roles):
+            if name and role:
+                MissionParty.objects.create(house=house, name=name, role=role)
+                
+        # Process documents
+        for doc_file in request.FILES.getlist('documents[]'):
+            MissionDocument.objects.create(house=house, file=doc_file, name=doc_file.name)
+            
+        # Process plans
+        for plan_file in request.FILES.getlist('plans[]'):
+            # Just store the first one in floor_plan_image for now as it's built-in
+            # If they upload multiple, it overwrites. A dedicated model is better for multiple.
+            house.floor_plan_image = plan_file
             house.save()
-            return redirect('house_detail', house_id=house.id)
-    else:
-        form = HouseForm()
-    return render(request, 'create_house.html', {'form': form})
+            
+        # Process medias (360 rooms)
+        for media_file in request.FILES.getlist('medias[]'):
+            Room.objects.create(house=house, image=media_file, title=media_file.name.split('.')[0])
+        if request.POST.get('action') == 'save_and_stay':
+            return JsonResponse({'status': 'success', 'house_id': house.id})
+            
+        return redirect('house_detail', house_id=house.id)
+    return render(request, 'create_house.html')
+
+@login_required
+def edit_house(request, house_id):
+    house = get_object_or_404(House, id=house_id, owner=request.user)
+    if request.method == 'POST':
+        house.name = request.POST.get('name', house.name)
+        house.official_title = request.POST.get('official_title', house.official_title)
+        house.reference = request.POST.get('reference', house.reference)
+        house.mission_type = request.POST.get('mission_type', house.mission_type)
+        house.client = request.POST.get('client', house.client)
+        house.address = request.POST.get('address', house.address)
+        house.wilaya = request.POST.get('wilaya', house.wilaya)
+        house.commune = request.POST.get('commune', house.commune)
+        
+        # Dates - parse them correctly if they exist
+        for date_field in ['start_date', 'deadline', 'order_date', 'reception_date']:
+            val = request.POST.get(date_field)
+            if val:
+                setattr(house, date_field, val)
+                
+        house.save()
+        
+        # Process parties (since the form sends all parties, we replace them to avoid duplicates)
+        party_names = request.POST.getlist('party_name[]')
+        party_roles = request.POST.getlist('party_role[]')
+        if 'party_name[]' in request.POST:
+            house.parties.all().delete()
+            for name, role in zip(party_names, party_roles):
+                if name and role:
+                    MissionParty.objects.create(house=house, name=name, role=role)
+                    
+        # Process documents
+        for doc_file in request.FILES.getlist('documents[]'):
+            MissionDocument.objects.create(house=house, file=doc_file, name=doc_file.name)
+            
+        # Process plans
+        for plan_file in request.FILES.getlist('plans[]'):
+            house.floor_plan_image = plan_file
+            house.save()
+            
+        # Process medias
+        for media_file in request.FILES.getlist('medias[]'):
+            Room.objects.create(house=house, image=media_file, title=media_file.name.split('.')[0])
+            
+        # If the request indicates they want to stay on the page (e.g., via a query param)
+        if request.POST.get('action') == 'save_and_stay':
+            # We pass a flag to tell the template to stay on the same tab
+            # But the redirect will lose the tab state unless we pass it. We can rely on javascript redirect.
+            return JsonResponse({'status': 'success', 'house_id': house.id})
+            
+        return redirect('house_detail', house_id=house.id)
+        
+    return render(request, 'create_house.html', {'house': house})
 
 @login_required
 def house_detail(request, house_id):
-    """Manage rooms and connections for a house"""
+    """View and manage a specific house/mission"""
     house = get_object_or_404(House, id=house_id, owner=request.user)
     rooms = house.rooms.all()
+    parties = house.parties.all()
+    documents = house.documents.all()
     return render(request, 'house_detail.html', {
         'house': house,
-        'rooms': rooms
+        'rooms': rooms,
+        'parties': parties,
+        'documents': documents
     })
+
+@login_required
+def delete_house(request, house_id):
+    """Delete a house/mission"""
+    house = get_object_or_404(House, id=house_id, owner=request.user)
+    if request.method == 'POST':
+        house.delete()
+        from django.contrib import messages
+        messages.success(request, 'Mission supprimée avec succès.')
+        return redirect('house_list')
+    # If not POST, just redirect back to list
+    return redirect('house_list')
 
 @login_required
 def add_room(request, house_id):

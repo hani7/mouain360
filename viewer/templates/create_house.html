@@ -1,152 +1,842 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_base.html' %}
 {% load static %}
 
-{% block title %}Créer une Propriété — Mouain 360{% endblock %}
-
-{% block extra_css %}
-<style>
-    .upload-wrapper {
-        max-width: 680px;
-        margin: 3rem auto;
-        padding: 0 1rem;
-    }
-    .back-link {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        color: rgba(229,233,238,0.5); text-decoration: none;
-        font-size: 0.875rem; margin-bottom: 1.5rem; transition: color 0.2s;
-    }
-    .back-link:hover { color: var(--primary); }
-    .upload-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; }
-    .upload-title span { color: var(--primary); }
-    .upload-subtitle { color: rgba(229,233,238,0.45); font-size: 0.95rem; margin-bottom: 2rem; }
-    .upload-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(1,238,254,0.12);
-        border-radius: 22px; padding: 2.5rem;
-        backdrop-filter: blur(12px);
-    }
-    .field-label {
-        display: block; font-size: 0.82rem; font-weight: 700;
-        color: var(--primary); text-transform: uppercase;
-        letter-spacing: 1.5px; margin-bottom: 0.55rem;
-    }
-    .field-hint { font-size: 0.78rem; color: rgba(229,233,238,0.35); margin-top: 0.4rem; }
-    .upload-card input[type="text"],
-    .upload-card textarea {
-        width: 100%; padding: 0.85rem 1.1rem;
-        background: rgba(255,255,255,0.05);
-        border: 1.5px solid rgba(1,238,254,0.15);
-        border-radius: 12px; color: var(--light);
-        font-size: 0.95rem; font-family: 'Inter', sans-serif;
-        transition: border-color 0.25s; outline: none;
-        resize: vertical;
-    }
-    .upload-card input[type="text"]:focus,
-    .upload-card textarea:focus {
-        border-color: var(--primary); background: rgba(1,238,254,0.04);
-        box-shadow: 0 0 0 3px rgba(1,238,254,0.08);
-    }
-    .drop-zone {
-        border: 2px dashed rgba(1,238,254,0.25); border-radius: 16px;
-        padding: 2rem 1.5rem; text-align: center; cursor: pointer;
-        transition: all 0.3s; background: rgba(1,238,254,0.02); position: relative;
-    }
-    .drop-zone:hover, .drop-zone.drag-over {
-        border-color: var(--primary); background: rgba(1,238,254,0.06);
-    }
-    .drop-zone input[type="file"] {
-        position: absolute; inset: 0; opacity: 0; cursor: pointer;
-        width: 100%; height: 100%;
-    }
-    .drop-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-    .drop-text { font-size: 0.95rem; font-weight: 600; color: var(--light); }
-    .drop-sub  { font-size: 0.78rem; color: rgba(229,233,238,0.4); margin-top: 0.3rem; }
-    .file-name-display { margin-top: 0.6rem; font-size: 0.82rem; color: var(--primary); font-weight: 600; display: none; }
-    .form-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 1.6rem 0; }
-    .field-optional { color: rgba(229,233,238,0.3); font-size: 0.72rem; margin-left: 0.5rem; font-weight: 400; text-transform: none; }
-    .btn-upload {
-        width: 100%; padding: 1rem;
-        background: linear-gradient(135deg, #01eefe, #0074ff);
-        color: #0d1117; border: none; border-radius: 12px;
-        font-weight: 800; font-size: 1rem; cursor: pointer;
-        transition: all 0.3s; margin-bottom: 0.8rem;
-    }
-    .btn-upload:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(1,238,254,0.3); }
-    .btn-back-secondary {
-        display: block; width: 100%; padding: 0.85rem;
-        background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
-        border-radius: 12px; color: rgba(229,233,238,0.7);
-        text-align: center; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
-    }
-    .btn-back-secondary:hover { border-color: rgba(229,233,238,0.25); color: var(--light); }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="upload-wrapper">
-    <a href="{% url 'house_list' %}" class="back-link">← Retour aux propriétés</a>
+<style>
+    /* Scope styles to this specific page to avoid bleeding */
+    .mission-page {
+        background-color: #0b1120;
+        color: #e5e9ee;
+        min-height: calc(100vh - 40px); /* Adjust for padding in base layout */
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+    }
 
-    <h1 class="upload-title">Nouvelle <span>Propriété</span></h1>
-    <p class="upload-subtitle">Créez un espace de visite virtuelle 360° immersive pour votre bien immobilier.</p>
+    .mission-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
 
-    <div class="upload-card">
-        <form method="post" enctype="multipart/form-data" id="createForm">
-            {% csrf_token %}
+    .mission-header h1 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        color: #fff;
+    }
 
-            <!-- Name -->
-            <div style="margin-bottom:1.4rem;">
-                <label class="field-label" for="id_name">Nom de la propriété</label>
-                {{ form.name }}
-                <p class="field-hint">Ex: Villa Jasmine, Appartement T3 Centre-Ville…</p>
-            </div>
+    .mission-header p {
+        font-size: 0.85rem;
+        color: rgba(229,233,238,0.6);
+        margin: 0.2rem 0 0 0;
+    }
 
-            <!-- Description -->
-            <div style="margin-bottom:1.4rem;">
-                <label class="field-label" for="id_description">
-                    Description <span class="field-optional">(optionnel)</span>
-                </label>
-                {{ form.description }}
-                <p class="field-hint">Décrivez brièvement la propriété (surface, emplacement, points forts…)</p>
-            </div>
+    .mission-actions {
+        display: flex;
+        gap: 1rem;
+    }
 
-            <hr class="form-divider">
+    .btn-outline {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-            <!-- Floor plan image -->
-            <div>
-                <label class="field-label">
-                    Image du plan d'étage <span class="field-optional">(optionnel)</span>
-                </label>
-                <div class="drop-zone" id="dropZone">
-                    {{ form.floor_plan_image }}
-                    <div class="drop-icon">🏗️</div>
-                    <div class="drop-text">Glissez votre plan ici</div>
-                    <div class="drop-sub">ou cliquez pour parcourir • JPG / PNG</div>
-                    <div class="file-name-display" id="fileNameDisplay"></div>
+    .btn-outline:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .btn-primary-neon {
+        background: var(--primary);
+        color: #000;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary-neon:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 10px rgba(1, 237, 254, 0.4);
+    }
+
+    /* Tabs */
+    .mission-tabs {
+        display: flex;
+        padding: 0 2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.02);
+    }
+
+    .mission-tab {
+        padding: 1rem 2rem;
+        color: rgba(229,233,238,0.5);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .mission-tab.active {
+        color: #fff;
+        border-bottom-color: var(--primary);
+    }
+    
+    .mission-tab:hover:not(.active) {
+        color: rgba(229,233,238,0.8);
+    }
+
+    /* Main Layout */
+    .mission-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        padding: 2rem;
+        flex: 1;
+    }
+
+    .card-panel {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .panel-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #fff;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+        color: rgba(229,233,238,0.8);
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #fff;
+        padding: 0.7rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        transition: all 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(0,0,0,0.3);
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px;
+    }
+    
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+        cursor: pointer;
+    }
+
+    /* Right Panel - Parties */
+    .btn-add-party {
+        width: 100%;
+        background: transparent;
+        border: 1px dashed rgba(255,255,255,0.2);
+        color: var(--primary);
+        padding: 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-add-party:hover {
+        border-color: var(--primary);
+        background: rgba(1, 237, 254, 0.05);
+    }
+
+    .party-item {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .party-info h5 {
+        margin: 0 0 0.2rem 0;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .party-info p {
+        margin: 0;
+        color: rgba(229,233,238,0.5);
+        font-size: 0.8rem;
+    }
+
+    .party-role-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .role-demandeur { background: rgba(1, 237, 254, 0.1); color: var(--primary); }
+    .role-entreprise { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .role-autre { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+    .btn-icon {
+        background: transparent;
+        border: none;
+        color: rgba(255,255,255,0.3);
+        cursor: pointer;
+        padding: 0.2rem;
+        transition: color 0.2s;
+    }
+    .btn-icon:hover { color: var(--danger); }
+
+    /* Footer status bar */
+    .mission-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.2rem 2rem;
+        background: rgba(255,255,255,0.02);
+        border-top: 1px solid rgba(255,255,255,0.05);
+        margin-top: auto;
+    }
+    
+    .status-indicators {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .status-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        background: rgba(255,255,255,0.05);
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .status-icon.pending {
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.5);
+    }
+    
+    .status-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .status-text span:first-child {
+        font-size: 0.75rem;
+        color: rgba(229,233,238,0.8);
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: grid;
+    }
+    
+    .file-upload-area {
+        background: rgba(0,0,0,0.2);
+        border: 2px dashed rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 3rem;
+        text-align: center;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .file-upload-area:hover {
+        border-color: var(--primary);
+        background: rgba(1, 237, 254, 0.02);
+    }
+    .file-upload-area i {
+        color: rgba(229,233,238,0.5);
+        margin-bottom: 1rem;
+    }
+    
+    /* Hide default file input inside the area */
+    .file-upload-area input[type="file"] {
+        display: none;
+    }
+
+    .status-text span:last-child {
+        font-size: 0.7rem;
+        color: rgba(229,233,238,0.5);
+    }
+</style>
+
+<div class="mission-page">
+    <form method="POST" action="{% url 'create_house' %}" id="missionForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Sticky Header Container -->
+        <div class="sticky-header" style="position: sticky; top: 0; z-index: 100; background-color: #0b1120; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <!-- Top Bar -->
+            <div class="mission-topbar" style="border-bottom: none;">
+                <div class="mission-header">
+                    <h1>Nouvelle mission</h1>
+                    <p>En préparation</p>
+                </div>
+                <div class="mission-actions">
+                    <button type="button" class="btn-outline" onclick="saveAsDraft(this)">ENREGISTRER</button>
+                    <button type="button" class="btn-primary-neon next-btn" onclick="handleNextClick()">PASSER AUX DOCUMENTS &rarr;</button>
                 </div>
             </div>
 
-            <hr class="form-divider">
+            <!-- Tabs -->
+            <div class="mission-tabs" style="border-bottom: none;">
+                <div class="mission-tab active" onclick="switchTab('tab-informations', this)">INFORMATIONS</div>
+                <div class="mission-tab" onclick="switchTab('tab-documents', this)">DOCUMENTS</div>
+                <div class="mission-tab" onclick="switchTab('tab-plans', this)">PLANS</div>
+                <div class="mission-tab" onclick="switchTab('tab-medias', this)">MÉDIAS</div>
+            </div>
+        </div>
 
-            <button type="submit" class="btn-upload">🏠 Créer la propriété</button>
-            <a href="{% url 'house_list' %}" class="btn-back-secondary">Annuler</a>
-        </form>
-    </div>
+        <!-- Main Content -->
+        <div class="mission-content tab-content active" id="tab-informations">
+            <!-- Left Panel -->
+            <div class="card-panel">
+                <h3 class="panel-title">INFORMATIONS DU PROJET</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nom interne du projet (facultatif)</label>
+                        <input type="text" name="name" class="form-control" placeholder="Ex: Villa Hydra - Suivi chantier" value="{{ house.name|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Date de début</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ house.start_date|date:'Y-m-d' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Intitulé officiel de la mission *</label>
+                        <input type="text" name="official_title" class="form-control" required placeholder="Ex: Suivi de chantier - Villa Hydra" value="{{ house.official_title|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Date limite / Échéance</label>
+                        <input type="date" name="deadline" class="form-control" value="{{ house.deadline|date:'Y-m-d' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Référence officielle</label>
+                        <input type="text" name="reference" class="form-control" placeholder="Ex: BC-026" value="{{ house.reference|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Juridiction / Organisme / Client *</label>
+                        <input type="text" name="client" class="form-control" required placeholder="Ex: Maître d'ouvrage" value="{{ house.client|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nature / Type de mission *</label>
+                        <select name="mission_type" class="form-control" required>
+                            <option value="Suivi chantier" {% if house.mission_type == 'Suivi chantier' %}selected{% endif %}>Suivi chantier</option>
+                            <option value="Constat" {% if house.mission_type == 'Constat' %}selected{% endif %}>Constat</option>
+                            <option value="Expertise judiciaire" {% if house.mission_type == 'Expertise judiciaire' %}selected{% endif %}>Expertise judiciaire</option>
+                            <option value="Visite 360" {% if house.mission_type == 'Visite 360' %}selected{% endif %}>Visite 360</option>
+                            <option value="Autre" {% if house.mission_type == 'Autre' %}selected{% endif %}>Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Adresse *</label>
+                        <input type="text" name="address" class="form-control" required placeholder="Ex: Lotissement les Orangers, Villa 12" value="{{ house.address|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date de l'ordonnance / commande</label>
+                        <input type="date" name="order_date" class="form-control" value="{{ house.order_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Wilaya *</label>
+                        <input type="text" name="wilaya" class="form-control" required placeholder="Ex: Alger" value="{{ house.wilaya|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date de réception</label>
+                        <input type="date" name="reception_date" class="form-control" value="{{ house.reception_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Commune *</label>
+                        <input type="text" name="commune" class="form-control" required placeholder="Ex: Hydra" value="{{ house.commune|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="card-panel">
+                <h3 class="panel-title">PARTIES CONCERNÉES</h3>
+                
+                <button type="button" class="btn-add-party" onclick="addParty()">
+                    <i data-lucide="plus"></i> AJOUTER UNE PARTIE
+                </button>
+                
+                <div id="parties-list">
+                    {% if house and house.parties.all %}
+                        {% for party in house.parties.all %}
+                        <div class="form-grid party-entry" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px; position: relative;">
+                            <button type="button" onclick="this.parentElement.remove()" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #ef4444; cursor: pointer;">
+                                <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                            </button>
+                            <div class="form-group">
+                                <label>Nom / Raison sociale</label>
+                                <input type="text" name="party_name[]" class="form-control" value="{{ party.name }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Rôle / Qualité</label>
+                                <select name="party_role[]" class="form-control">
+                                    <option value="Demandeur" {% if party.role == 'Demandeur' %}selected{% endif %}>Demandeur</option>
+                                    <option value="Défendeur" {% if party.role == 'Défendeur' %}selected{% endif %}>Défendeur</option>
+                                    <option value="Tiers" {% if party.role == 'Tiers' %}selected{% endif %}>Tiers</option>
+                                    <option value="Expert" {% if party.role == 'Expert' %}selected{% endif %}>Expert</option>
+                                    <option value="Autre" {% if party.role == 'Autre' %}selected{% endif %}>Autre</option>
+                                </select>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Dynamic parties will be injected here -->
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Content for DOCUMENTS -->
+        <div class="mission-content tab-content" id="tab-documents" style="display: block;">
+            <div class="card-panel" style="width: 100%;">
+                <h3 class="panel-title">DOCUMENTS LIÉS À LA MISSION</h3>
+                <label class="file-upload-area" style="display: block;">
+                    <i data-lucide="file-text" style="width: 48px; height: 48px;"></i>
+                    <p style="color: #fff; font-size: 1.1rem; margin: 0 0 0.5rem 0;">Glissez et déposez vos documents ici</p>
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin: 0;">PDF, Word, Excel, etc.</p>
+                    <input type="file" name="documents[]" multiple onchange="handleFileSelect(this, 'doc-list', 'doc-count')">
+                </label>
+                <div id="doc-list" class="file-preview-list" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+
+        <!-- Content for PLANS -->
+        <div class="mission-content tab-content" id="tab-plans" style="display: block;">
+            <div class="card-panel" style="width: 100%;">
+                <h3 class="panel-title">PLANS DE MASSE / PLANS D'ARCHITECTURE</h3>
+                <label class="file-upload-area" style="display: block;">
+                    <i data-lucide="layout-template" style="width: 48px; height: 48px;"></i>
+                    <p style="color: #fff; font-size: 1.1rem; margin: 0 0 0.5rem 0;">Glissez et déposez vos plans ici</p>
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin: 0;">JPG, PNG, PDF</p>
+                    <input type="file" name="plans[]" multiple accept="image/*,.pdf" onchange="handleFileSelect(this, 'plan-list', 'plan-count')">
+                </label>
+                <div id="plan-list" class="file-preview-list" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+
+        <!-- Content for MEDIAS -->
+        <div class="mission-content tab-content" id="tab-medias" style="display: block;">
+            <div class="card-panel" style="width: 100%;">
+                <h3 class="panel-title">MÉDIAS 360°</h3>
+                <label class="file-upload-area" style="display: block;">
+                    <i data-lucide="image" style="width: 48px; height: 48px;"></i>
+                    <p style="color: #fff; font-size: 1.1rem; margin: 0 0 0.5rem 0;">Ajoutez vos photos panoramiques 360°</p>
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin: 0;">Fichiers JPG (ratio 2:1 recommandé)</p>
+                    <input type="file" name="medias[]" multiple accept="image/jpeg,image/png" onchange="handleFileSelect(this, 'media-list', 'media-count')">
+                </label>
+                <div id="media-list" class="file-preview-list" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mission-footer">
+            <div class="status-indicators">
+                <div class="status-label">ÉTAT DE PRÉPARATION</div>
+                
+                <div class="status-item">
+                    <div class="status-icon"><i data-lucide="check" style="width:14px;"></i></div>
+                    <div class="status-text">
+                        <span>Informations</span>
+                        <span>Complété</span>
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon pending" id="status-doc-icon"><i data-lucide="folder" style="width:14px;"></i></div>
+                    <div class="status-text">
+                        <span>Documents</span>
+                        <span id="status-doc-text">0 fichiers</span>
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon pending" id="status-plan-icon"><i data-lucide="layout-template" style="width:14px;"></i></div>
+                    <div class="status-text">
+                        <span>Plans</span>
+                        <span id="status-plan-text">0 plans</span>
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon pending" id="status-media-icon"><i data-lucide="image" style="width:14px;"></i></div>
+                    <div class="status-text">
+                        <span>Médias</span>
+                        <span id="status-media-text">0 fichiers</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="btn-primary-neon next-btn" onclick="handleNextClick()">PASSER AUX DOCUMENTS &rarr;</button>
+        </div>
+    </form>
 </div>
 
 <script>
-    const zone = document.getElementById('dropZone');
-    const fileInput = zone.querySelector('input[type="file"]');
-    const display = document.getElementById('fileNameDisplay');
-    if (zone && fileInput) {
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); });
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                display.textContent = '✓ ' + fileInput.files[0].name;
-                display.style.display = 'block';
+    let partyCounter = 0;
+
+    function addParty() {
+        // En vrai, on pourrait afficher une modale pour saisir les détails, 
+        // mais pour faire simple et rapide comme sur la maquette, on ajoute des inputs
+        
+        let name = prompt("Nom de la partie (ex: M. Karim Benali):");
+        if (!name) return;
+        
+        let rolePrompt = prompt("Rôle (1: Demandeur, 2: Entreprise, 3: Autre):");
+        let role = "Autre";
+        let roleClass = "role-autre";
+        
+        if (rolePrompt === "1") { role = "Demandeur"; roleClass = "role-demandeur"; }
+        else if (rolePrompt === "2") { role = "Entreprise"; roleClass = "role-entreprise"; }
+
+        let subRole = prompt("Description du rôle (ex: Maître d'ouvrage):");
+        
+        const list = document.getElementById('parties-list');
+        const partyId = 'party-' + partyCounter++;
+        
+        const partyHTML = `
+            <div class="party-item" id="${partyId}">
+                <!-- Hidden inputs so they get submitted with the form -->
+                <input type="hidden" name="party_name[]" value="${name}">
+                <input type="hidden" name="party_role[]" value="${role}">
+                
+                <div class="party-info">
+                    <h5>${name}</h5>
+                    <p>${subRole || role}</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <span class="party-role-badge ${roleClass}">${role}</span>
+                    <button type="button" class="btn-icon" onclick="document.getElementById('${partyId}').remove()">
+                        <i data-lucide="trash-2" style="width:16px;"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        list.insertAdjacentHTML('beforeend', partyHTML);
+        lucide.createIcons(); // Refresh icons for the new HTML
+    }
+
+    function switchTab(tabId, element) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+            content.classList.remove('active'); // For the grid one
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.mission-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show target tab
+        const target = document.getElementById(tabId);
+        if (tabId === 'tab-informations') {
+            target.style.display = 'grid';
+            target.classList.add('active');
+        } else {
+            target.style.display = 'block';
+            target.classList.add('active');
+        }
+        
+        // Activate clicked tab
+        element.classList.add('active');
+        
+        // Update URL hash without scrolling
+        history.replaceState(null, null, '#' + tabId);
+        
+        // Update Next button text
+        const nextBtns = document.querySelectorAll('.next-btn');
+        if (tabId === 'tab-informations') {
+            nextBtns.forEach(btn => btn.innerHTML = 'PASSER AUX DOCUMENTS &rarr;');
+        } else if (tabId === 'tab-documents') {
+            nextBtns.forEach(btn => btn.innerHTML = 'PASSER AUX PLANS &rarr;');
+        } else if (tabId === 'tab-plans') {
+            nextBtns.forEach(btn => btn.innerHTML = 'PASSER AUX MÉDIAS &rarr;');
+        } else if (tabId === 'tab-medias') {
+            nextBtns.forEach(btn => btn.innerHTML = "VALIDER ET CRÉER LA MISSION &rarr;");
+        }
+    }
+
+    function handleNextClick() {
+        const activeTab = document.querySelector('.mission-tab.active');
+        const tabs = document.querySelectorAll('.mission-tab');
+        
+        if (activeTab.textContent.trim() === 'INFORMATIONS') {
+            switchTab('tab-documents', tabs[1]);
+        } else if (activeTab.textContent.trim() === 'DOCUMENTS') {
+            switchTab('tab-plans', tabs[2]);
+        } else if (activeTab.textContent.trim() === 'PLANS') {
+            switchTab('tab-medias', tabs[3]);
+        } else {
+            document.getElementById('missionForm').submit();
+        }
+    }
+
+    // File accumulation store
+    const fileStores = {
+        'doc-list': new DataTransfer(),
+        'plan-list': new DataTransfer(),
+        'media-list': new DataTransfer()
+    };
+
+    function handleFileSelect(input, listId, displayId) {
+        const dt = fileStores[listId];
+        
+        // Add new files to our DataTransfer object
+        for (let i = 0; i < input.files.length; i++) {
+            dt.items.add(input.files[i]);
+        }
+        
+        // Update the input's files with our accumulated list
+        input.files = dt.files;
+        
+        // Render the visual list
+        renderFileList(listId, input, displayId);
+    }
+    
+    function renderFileList(listId, input, displayId) {
+        const listEl = document.getElementById(listId);
+        listEl.innerHTML = ''; // Clear current
+        
+        const files = input.files;
+        
+        if (files.length === 0) {
+            updateFooterStatus(displayId, 0);
+            return;
+        }
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);';
+            
+            const nameEl = document.createElement('span');
+            nameEl.textContent = file.name;
+            nameEl.style.color = '#e5e9ee';
+            nameEl.style.fontSize = '0.9rem';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.style.cssText = 'background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; font-weight: bold; line-height: 1;';
+            removeBtn.onclick = function() {
+                removeFile(listId, input, i, displayId);
+            };
+            
+            item.appendChild(nameEl);
+            item.appendChild(removeBtn);
+            listEl.appendChild(item);
+        }
+        
+        updateFooterStatus(displayId, files.length);
+    }
+    
+    function removeFile(listId, input, indexToRemove, displayId) {
+        const dt = fileStores[listId];
+        
+        // Create a new DataTransfer because we can't remove items directly by index easily in all browsers
+        const newDt = new DataTransfer();
+        
+        for (let i = 0; i < dt.files.length; i++) {
+            if (i !== indexToRemove) {
+                newDt.items.add(dt.files[i]);
             }
+        }
+        
+        // Replace old DataTransfer and input files
+        fileStores[listId] = newDt;
+        input.files = newDt.files;
+        
+        // Re-render
+        renderFileList(listId, input, displayId);
+    }
+    
+    function updateFooterStatus(displayId, count) {
+        let statusPrefix = "";
+        let statusSuffix = "";
+        if (displayId === 'doc-count') { statusPrefix = 'status-doc'; statusSuffix = ' fichiers'; }
+        if (displayId === 'plan-count') { statusPrefix = 'status-plan'; statusSuffix = ' plans'; }
+        if (displayId === 'media-count') { statusPrefix = 'status-media'; statusSuffix = ' fichiers'; }
+        
+        const icon = document.getElementById(statusPrefix + '-icon');
+        const text = document.getElementById(statusPrefix + '-text');
+        
+        if (count > 0) {
+            icon.classList.remove('pending');
+            text.textContent = count + statusSuffix;
+            text.style.color = "#10b981";
+        } else {
+            icon.classList.add('pending');
+            text.textContent = "0" + statusSuffix;
+            text.style.color = "rgba(229,233,238,0.6)";
+        }
+    }
+    
+    function saveAsDraft(btnElement) {
+        const form = document.getElementById('missionForm');
+        const formData = new FormData(form);
+        formData.append('action', 'save_and_stay');
+        
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = "SAUVEGARDE...";
+        btnElement.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update form action to edit mode so it updates the same house on next save
+                form.action = `/viewer/house/${data.house_id}/edit/`;
+                
+                // Clear file inputs and our custom stores so we don't upload the same files again
+                document.querySelectorAll('input[type="file"]').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Reset custom data stores
+                fileStores['doc-list'] = new DataTransfer();
+                fileStores['plan-list'] = new DataTransfer();
+                fileStores['media-list'] = new DataTransfer();
+                
+                // Clear UI lists
+                document.getElementById('doc-list').innerHTML = "";
+                document.getElementById('plan-list').innerHTML = "";
+                document.getElementById('media-list').innerHTML = "";
+                
+                btnElement.innerHTML = "SAUVEGARDÉ ✓";
+                setTimeout(() => {
+                    btnElement.innerHTML = "ENREGISTRER";
+                    btnElement.disabled = false;
+                }, 3000);
+            } else {
+                alert('Erreur lors de la sauvegarde.');
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de la sauvegarde.');
+            btnElement.innerHTML = originalText;
+            btnElement.disabled = false;
         });
     }
+    
+    // Initialize tabs on load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if there is a hash in the URL (e.g. #tab-documents)
+        const hash = window.location.hash;
+        if (hash) {
+            const tabId = hash.substring(1); // remove '#'
+            const tabElement = document.querySelector(`.mission-tab[onclick*="${tabId}"]`);
+            if (tabElement) {
+                switchTab(tabId, tabElement);
+                return;
+            }
+        }
+        // Fallback to informations
+        switchTab('tab-informations', document.querySelector('.mission-tab.active'));
+    });
 </script>
 {% endblock %}
