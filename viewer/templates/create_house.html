@@ -347,7 +347,7 @@
 </style>
 
 <div class="mission-page">
-    <form method="POST" action="{% url 'create_house' %}" id="missionForm" enctype="multipart/form-data" data-house-id="{{ house.id|default:'new' }}">
+    <form method="POST" action="{% if house %}{% url 'edit_house' house.id %}{% else %}{% url 'create_house' %}{% endif %}" id="missionForm" enctype="multipart/form-data" data-house-id="{{ house.id|default:'new' }}">
         {% csrf_token %}
         
         <!-- Sticky Header Container -->
@@ -355,8 +355,8 @@
             <!-- Top Bar -->
             <div class="mission-topbar" style="border-bottom: none;">
                 <div class="mission-header">
-                    <h1>Nouvelle mission</h1>
-                    <p>En préparation</p>
+                    <h1>{% if house %}Modifier la mission{% else %}Nouvelle mission{% endif %}</h1>
+                    <p>{% if house %}{{ house.name }}{% else %}En préparation{% endif %}</p>
                 </div>
                 <div class="mission-actions">
                     <button type="button" class="btn-outline" onclick="saveAsDraft(this)">ENREGISTRER</button>
@@ -794,6 +794,7 @@
             if (data.status === 'success') {
                 // Update form action to edit mode so it updates the same house on next save
                 form.action = `/viewer/house/${data.house_id}/edit/`;
+                form.dataset.houseId = data.house_id;
                 
                 // Clear file inputs and our custom stores so we don't upload the same files again
                 document.querySelectorAll('input[type="file"]').forEach(input => {

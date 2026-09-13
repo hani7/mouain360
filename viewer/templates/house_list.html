@@ -71,7 +71,7 @@
               🚶 Démarrer la Visite
             </a>
             {% else %}
-            <a href="{% url 'house_detail' house.id %}" class="luxury-btn luxury-btn-primary w-100">
+            <a href="{% url 'edit_house' house.id %}" class="luxury-btn luxury-btn-primary w-100">
               ⚙️ Gérer les Pièces
             </a>
             {% endif %}
@@ -84,7 +84,7 @@
             <a href="{% url 'download_house_qr_code' house.id %}" class="icon-btn" title="QR Code">
               <i data-lucide="qr-code" style="width:16px;"></i>
             </a>
-            <a href="{% url 'house_detail' house.id %}" class="icon-btn" title="Gérer">
+            <a href="{% url 'edit_house' house.id %}" class="icon-btn" title="Gérer">
               <i data-lucide="settings" style="width:16px;"></i>
             </a>
             <form method="POST" action="{% url 'delete_house' house.id %}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission et toutes ses données (images, plans) ?');">
