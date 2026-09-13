@@ -2,6 +2,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/mouinc28/mouin360
+    - cd $DEPLOYPATH && git fetch --all && git reset --hard HEAD
     - /bin/cp -R * $DEPLOYPATH
     - cd $DEPLOYPATH
     - /home/mouinc28/virtualenv/mouin360/3.12/bin/python manage.py migrate
