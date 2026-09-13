@@ -51,7 +51,7 @@ body {
 /* ===== LEFT PANEL ===== */
 .login-left {
     flex: 1;
-    max-width: 650px;
+    max-width: 700px;
     padding-right: 2rem;
 }
 
@@ -60,16 +60,16 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     width: 100%;
 }
 
 .animated-logo {
-    width: 320px;
+    width: 220px;
     height: auto;
     animation: floatingLogo 4s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(1, 237, 254, 0.4));
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 @keyframes floatingLogo {
@@ -79,10 +79,10 @@ body {
 }
 
 .brand-title {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    margin-bottom: 1rem;
     color: #ffffff;
     text-align: center;
 }
@@ -90,7 +90,7 @@ body {
 .brand-subtitle {
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     max-width: 500px;
     line-height: 1.5;
     text-align: center;
@@ -101,7 +101,8 @@ body {
 .domain-icons {
     display: flex;
     gap: 2rem;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+    justify-content: center;
 }
 
 .domain-item {
@@ -215,6 +216,16 @@ body {
 
 .form-input::placeholder {
     color: rgba(255, 255, 255, 0.4);
+}
+
+/* Fix for Chrome autofill white background */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover, 
+.form-input:-webkit-autofill:focus, 
+.form-input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #1a1f2b inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .eye-icon {
