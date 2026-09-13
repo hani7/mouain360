@@ -57,21 +57,34 @@ body {
 
 .brand-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 3rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    width: 100%;
 }
 
-.brand-logo {
-    height: 40px;
+.animated-logo {
+    width: 320px;
+    height: auto;
+    animation: floatingLogo 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(1, 237, 254, 0.4));
+    margin-bottom: 1.5rem;
+}
+
+@keyframes floatingLogo {
+    0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 15px rgba(1, 237, 254, 0.4)); }
+    50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 25px rgba(1, 237, 254, 0.8)); }
+    100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 15px rgba(1, 237, 254, 0.4)); }
 }
 
 .brand-title {
-    font-size: 2.8rem;
+    font-size: 2.5rem;
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 1.5rem;
     color: #ffffff;
+    text-align: center;
 }
 
 .brand-subtitle {
@@ -80,6 +93,9 @@ body {
     margin-bottom: 3rem;
     max-width: 500px;
     line-height: 1.5;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .domain-icons {
