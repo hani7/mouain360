@@ -2,10 +2,8 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/mouinc28/mouin360
-    - cd $DEPLOYPATH && git fetch --all && git reset --hard HEAD
-    - /bin/cp -R * $DEPLOYPATH
-    - cd $DEPLOYPATH
-    - /home/mouinc28/virtualenv/mouin360/3.12/bin/python manage.py migrate
+    - cd $DEPLOYPATH && git fetch origin && git reset --hard origin/main
+    - /home/mouinc28/virtualenv/mouin360/3.12/bin/python manage.py migrate --run-syncdb
     - /home/mouinc28/virtualenv/mouin360/3.12/bin/python manage.py collectstatic --noinput
     - /bin/mkdir -p $DEPLOYPATH/tmp
     - /bin/touch $DEPLOYPATH/tmp/restart.txt
