@@ -324,13 +324,29 @@ body {
     .login-wrapper {
         flex-direction: column;
         justify-content: center;
-        padding: 2rem;
+        padding: 1rem;
     }
     .login-left {
-        display: none; /* Hide left side on smaller screens to focus on login */
+        max-width: 100%;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    .brand-title, .brand-subtitle, .domain-icons, .feature-list {
+        display: none;
     }
     .login-right {
         width: 100%;
         max-width: 450px;
+    }
+    .glass-card {
+        padding: 2rem 1.5rem;
+    }
+}
+@media (max-width: 480px) {
+    .login-right {
+        max-width: 100%;
+    }
+    .animated-logo {
+        width: 180px;
     }
 }
