@@ -11,6 +11,9 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     
+    # Migrate (temporaire - superuser uniquement)
+    path('run-migrate/', views.run_migrate, name='run_migrate'),
+
     # Super Admin Dashboard
     path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('superadmin/delete-user/<int:user_id>/', views.superadmin_delete_user, name='superadmin_delete_user'),

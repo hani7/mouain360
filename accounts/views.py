@@ -9,6 +9,9 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
+from django.http import HttpResponse
+from django.core.management import call_command
+from io import StringIO
 import random
 from .models import UserOTP
 
@@ -271,3 +274,23 @@ def superadmin_delete_floor_plan(request, plan_id):
         except FloorPlan.DoesNotExist:
             pass
     return redirect('superadmin_floor_plans')
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def run_migrate(request):
+    """Vue temporaire pour appliquer les migrations via navigateur (superuser uniquement)"""
+    output = StringIO()
+    try:
+        call_command('migrate', '--no-input', stdout=output, stderr=output)
+        result = output.getvalue()
+        return HttpResponse(
+            f'<pre style="background:#111;color:#0f0;padding:2rem;font-size:14px;">'
+            f'✅ Migrations appliquées avec succès :\n\n{result}</pre>',
+            status=200
+        )
+    except Exception as e:
+        return HttpResponse(
+            f'<pre style="background:#111;color:#f44;padding:2rem;font-size:14px;">'
+            f'❌ Erreur lors des migrations :\n\n{str(e)}</pre>',
+            status=500
+        )
