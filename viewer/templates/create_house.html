@@ -347,7 +347,7 @@
 </style>
 
 <div class="mission-page">
-    <form method="POST" action="{% url 'create_house' %}" id="missionForm" enctype="multipart/form-data">
+    <form method="POST" action="{% url 'create_house' %}" id="missionForm" enctype="multipart/form-data" data-house-id="{{ house.id|default:'new' }}">
         {% csrf_token %}
         
         <!-- Sticky Header Container -->
@@ -638,6 +638,12 @@
         // Update URL hash without scrolling
         history.replaceState(null, null, '#' + tabId);
         
+        // Save last active tab to localStorage (per mission)
+        try {
+            const houseId = document.getElementById('missionForm').dataset.houseId || 'new';
+            localStorage.setItem('lastTab_' + houseId, tabId);
+        } catch(e) {}
+        
         // Update Next button text
         const nextBtns = document.querySelectorAll('.next-btn');
         if (tabId === 'tab-informations') {
@@ -825,17 +831,33 @@
     
     // Initialize tabs on load
     document.addEventListener('DOMContentLoaded', () => {
-        // Check if there is a hash in the URL (e.g. #tab-documents)
+        const form = document.getElementById('missionForm');
+        const houseId = form.dataset.houseId || 'new';
+
+        // Priority 1: URL hash (e.g. #tab-documents)
         const hash = window.location.hash;
         if (hash) {
-            const tabId = hash.substring(1); // remove '#'
+            const tabId = hash.substring(1);
             const tabElement = document.querySelector(`.mission-tab[onclick*="${tabId}"]`);
             if (tabElement) {
                 switchTab(tabId, tabElement);
                 return;
             }
         }
-        // Fallback to informations
+
+        // Priority 2: localStorage (last visited tab for this mission)
+        try {
+            const savedTab = localStorage.getItem('lastTab_' + houseId);
+            if (savedTab) {
+                const tabElement = document.querySelector(`.mission-tab[onclick*="${savedTab}"]`);
+                if (tabElement) {
+                    switchTab(savedTab, tabElement);
+                    return;
+                }
+            }
+        } catch(e) {}
+
+        // Priority 3: Fallback to informations
         switchTab('tab-informations', document.querySelector('.mission-tab.active'));
     });
 </script>
