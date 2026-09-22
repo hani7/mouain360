@@ -125,7 +125,8 @@ def download_qr_code(request, image_id):
 def download_house_qr_code(request, house_id):
     """Generates QR code for house walkthrough URL"""
     house = get_object_or_404(House, id=house_id, owner=request.user)
-    walkthrough_url = request.build_absolute_uri(f'/viewer/house/{house_id}/walkthrough/')
+    from django.urls import reverse
+    walkthrough_url = request.build_absolute_uri(reverse('public_tour', args=[house.share_token]))
     qr_code = generate_qr_code(walkthrough_url)
     response = HttpResponse(qr_code, content_type='image/png')
     response['Content-Disposition'] = f'attachment; filename="house_{house.name}_qr.png"'
