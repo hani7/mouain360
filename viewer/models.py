@@ -107,6 +107,37 @@ class Room(models.Model):
     def __str__(self):
         return f"{self.house.name} - {self.title}"
 
+    def save(self, *args, **kwargs):
+        # We need to save the model first so we have the image file on disk
+        super().save(*args, **kwargs)
+        
+        if self.image:
+            try:
+                from PIL import Image
+                import os
+                
+                img_path = self.image.path
+                img = Image.open(img_path)
+                
+                # Check if it needs resizing or format conversion
+                # 360 images should ideally be max 4096x2048 for web performance
+                max_width = 4096
+                max_height = 2048
+                
+                if img.width > max_width or img.height > max_height or img.format != 'JPEG':
+                    # Resize while maintaining aspect ratio (though 360 should be 2:1)
+                    img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+                    
+                    # Convert to RGB if it's RGBA (PNG)
+                    if img.mode in ('RGBA', 'P'):
+                        img = img.convert('RGB')
+                        
+                    # Save with compression
+                    img.save(img_path, format='JPEG', quality=85, optimize=True)
+            except Exception as e:
+                # If Pillow is missing or there's an error, just skip compression
+                print(f"Image compression failed: {e}")
+
     class Meta:
         ordering = ['house', 'title']
 
