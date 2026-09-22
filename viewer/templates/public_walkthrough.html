@@ -306,9 +306,48 @@
             transform: translateY(-2px);
             box-shadow: 0 0 20px rgba(1, 237, 254, 0.6);
         }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: rgba(229,233,238,0.7);
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <img src="/static/images/logo-360.png" alt="Mouin 360" style="height:50px; margin-bottom:1.5rem;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Chargement de la visite virtuelle...</div>
+    </div>
     <!-- Info Bar -->
     <div class="info-bar glass-panel">
         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -368,6 +407,11 @@
         // Parse scenes from Django
         const scenes = {{ scenes_json|safe }};
         
+        // Add type to each scene for faster loading
+        Object.keys(scenes).forEach(key => {
+            scenes[key].type = 'equirectangular';
+        });
+
         // Initialize Pannellum viewer
         const viewer = pannellum.viewer('panorama', {
             "default": {
@@ -377,7 +421,21 @@
             },
             "scenes": scenes
         });
-        
+
+        // Hide loading overlay when panorama is loaded
+        viewer.on('load', function() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }, 500);
+        });
+
+        // Handle errors
+        viewer.on('error', function(err) {
+            document.querySelector('.loading-text').textContent = 'Erreur de chargement. Vérifiez l\'image 360°.';
+            document.querySelector('.loading-spinner').style.display = 'none';
+        });
+
         // Update current room display on scene change
         viewer.on('scenechange', function(sceneId) {
             const roomItems = document.querySelectorAll('.room-list-item');
