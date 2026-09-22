@@ -342,6 +342,17 @@ def delete_room(request, room_id):
     return redirect('house_detail', house_id=house_id)
 
 @login_required
+def set_starting_point(request, room_id):
+    """Set a room as the starting point for the walkthrough"""
+    room = get_object_or_404(Room, id=room_id, house__owner=request.user)
+    if request.method == 'POST':
+        # Unset all other rooms in this house
+        room.house.rooms.update(is_starting_point=False)
+        room.is_starting_point = True
+        room.save()
+    return redirect('house_detail', house_id=room.house.id)
+
+@login_required
 def add_media(request, house_id):
     """Upload non-360 media files (images, videos, audio) to a mission"""
     house = get_object_or_404(House, id=house_id, owner=request.user)

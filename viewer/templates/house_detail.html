@@ -564,6 +564,13 @@
                                 Définir Position
                             </button>
                             {% endif %}
+
+                            {% if not room.is_starting_point %}
+                            <form method="post" action="{% url 'set_starting_point' room.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-small" style="color:var(--primary); border-color:rgba(1,237,254,0.3);">🚀 Départ</button>
+                            </form>
+                            {% endif %}
                             
                             <form method="post" action="{% url 'delete_room' room.id %}" style="display: inline;" onsubmit="return confirm('Supprimer cette pièce 360° ?');">
                                 {% csrf_token %}

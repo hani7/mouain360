@@ -28,6 +28,7 @@ urlpatterns = [
     path('room/<int:room_id>/edit-position/', views.edit_room_position, name='edit_room_position'),
     path('room/<int:room_id>/add-connection/', views.add_connection, name='add_connection'),
     path('room/<int:room_id>/delete/', views.delete_room, name='delete_room'),
+    path('room/<int:room_id>/set-starting-point/', views.set_starting_point, name='set_starting_point'),
     path('house/<int:house_id>/add-media/', views.add_media, name='add_media'),
     path('media/<int:media_id>/delete/', views.delete_media, name='delete_media'),
 ]
