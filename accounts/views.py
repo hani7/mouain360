@@ -276,7 +276,8 @@ def superadmin_delete_floor_plan(request, plan_id):
     return redirect('superadmin_floor_plans')
 
 
-# TEMP: protection retirée temporairement pour migration serveur\ndef run_migrate(request):
+# TEMP: protection retirée temporairement pour migration serveur
+def run_migrate(request):
     """Vue temporaire pour appliquer les migrations via navigateur (superuser uniquement)"""
     output = StringIO()
     try:
