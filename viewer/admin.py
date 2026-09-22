@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Image, House, Room, RoomConnection
+from .models import Image, House, Room, RoomConnection, MissionMedia
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
@@ -22,3 +22,10 @@ class RoomConnectionAdmin(admin.ModelAdmin):
     list_display = ['from_room', 'to_room', 'label']
     list_filter = ['from_room__house']
     search_fields = ['from_room__title', 'to_room__title', 'label']
+
+@admin.register(MissionMedia)
+class MissionMediaAdmin(admin.ModelAdmin):
+    list_display = ['name', 'house', 'media_type', 'uploaded_at']
+    list_filter = ['media_type', 'house']
+    search_fields = ['name', 'house__name']
+

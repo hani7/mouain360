@@ -6,7 +6,7 @@ import json
 
 from viewer.utils import generate_qr_code
 from floor_plan.models import FloorPlan
-from .models import Image, House, Room, RoomConnection, MissionParty, MissionDocument
+from .models import Image, House, Room, RoomConnection, MissionParty, MissionDocument, MissionMedia
 from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm
 
 # ===== Dashboard View =====
@@ -248,11 +248,13 @@ def house_detail(request, house_id):
     rooms = house.rooms.all()
     parties = house.parties.all()
     documents = house.documents.all()
+    medias = house.medias.all()
     return render(request, 'house_detail.html', {
         'house': house,
         'rooms': rooms,
         'parties': parties,
-        'documents': documents
+        'documents': documents,
+        'medias': medias,
     })
 
 @login_required
@@ -336,6 +338,39 @@ def delete_room(request, room_id):
     room = get_object_or_404(Room, id=room_id, house__owner=request.user)
     house_id = room.house.id
     room.delete()
+    return redirect('house_detail', house_id=house_id)
+
+@login_required
+def add_media(request, house_id):
+    """Upload non-360 media files (images, videos, audio) to a mission"""
+    house = get_object_or_404(House, id=house_id, owner=request.user)
+    if request.method == 'POST':
+        files = request.FILES.getlist('media_files')
+        for f in files:
+            # Auto-detect media type from extension
+            ext = f.name.rsplit('.', 1)[-1].lower() if '.' in f.name else ''
+            if ext in ('mp4', 'avi', 'mov', 'mkv', 'webm', 'wmv'):
+                media_type = 'video'
+            elif ext in ('mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'wma'):
+                media_type = 'audio'
+            else:
+                media_type = 'image'
+            MissionMedia.objects.create(
+                house=house,
+                file=f,
+                name=f.name,
+                media_type=media_type
+            )
+        return redirect('house_detail', house_id=house.id)
+    return redirect('house_detail', house_id=house.id)
+
+@login_required
+def delete_media(request, media_id):
+    """Delete a non-360 media file"""
+    media = get_object_or_404(MissionMedia, id=media_id, house__owner=request.user)
+    house_id = media.house.id
+    if request.method == 'POST':
+        media.delete()
     return redirect('house_detail', house_id=house_id)
 
 @login_required

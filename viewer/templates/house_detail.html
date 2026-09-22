@@ -292,6 +292,106 @@
         color: var(--primary);
     }
 
+    /* Media items grid */
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+    .media-card {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+    }
+    .media-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(1, 237, 254, 0.1);
+    }
+    .media-card-preview {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+        display: block;
+        background: rgba(0,0,0,0.5);
+    }
+    .media-card-placeholder {
+        width: 100%;
+        height: 130px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.4);
+        color: rgba(255,255,255,0.3);
+    }
+    .media-card-body {
+        padding: 0.8rem;
+    }
+    .media-card-name {
+        font-size: 0.8rem;
+        color: #fff;
+        margin: 0 0 0.3rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .media-card-type {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        display: inline-block;
+        font-weight: 600;
+    }
+    .type-image { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .type-video { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+    .type-audio { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .media-card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    .media-delete-btn {
+        background: none;
+        border: none;
+        color: rgba(255,71,87,0.6);
+        cursor: pointer;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    .media-delete-btn:hover {
+        color: #ff4757;
+        background: rgba(255,71,87,0.1);
+    }
+
+    /* Upload area */
+    .upload-drop-area {
+        border: 2px dashed rgba(255,255,255,0.15);
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 1rem;
+    }
+    .upload-drop-area:hover {
+        border-color: var(--primary);
+        background: rgba(1, 237, 254, 0.03);
+    }
+    .upload-drop-area.dragover {
+        border-color: var(--primary);
+        background: rgba(1, 237, 254, 0.06);
+    }
+
+    /* Informations full-width section */
+    .info-full-section {
+        grid-column: 1 / -1;
+    }
+
 </style>
 
 <div class="mission-page">
@@ -430,10 +530,10 @@
                 {% endif %}
             </div>
 
-            <!-- Rooms / Medias 360 -->
+            <!-- IMAGE 360 -->
             <div class="card-panel">
                 <h3 class="panel-title">
-                    MÉDIAS 360° ({{ rooms.count }})
+                    IMAGE 360 ({{ rooms.count }})
                     <a href="{% url 'add_room' house.id %}" class="btn-primary-neon" style="padding:0.3rem 0.6rem; font-size:0.75rem; color:#000;">
                         <i data-lucide="plus" style="width:12px; margin-right:4px;"></i> AJOUTER
                     </a>
@@ -473,9 +573,107 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem;">Aucun média 360° n'a été ajouté à cette mission.</p>
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem;">Aucune image 360° n'a été ajoutée à cette mission.</p>
                 {% endif %}
             </div>
+
+            <!-- MÉDIAS (non-360) -->
+            <div class="card-panel">
+                <h3 class="panel-title">
+                    MÉDIAS ({{ medias.count }})
+                    <button onclick="document.getElementById('media-upload-area').style.display = document.getElementById('media-upload-area').style.display === 'none' ? 'block' : 'none'" class="btn-primary-neon" style="padding:0.3rem 0.6rem; font-size:0.75rem; color:#000;">
+                        <i data-lucide="plus" style="width:12px; margin-right:4px;"></i> AJOUTER
+                    </button>
+                </h3>
+
+                <!-- Upload area (hidden by default) -->
+                <div id="media-upload-area" style="display:none; margin-bottom:1rem;">
+                    <form method="post" action="{% url 'add_media' house.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="upload-drop-area" id="drop-zone" onclick="document.getElementById('media-file-input').click()">
+                            <i data-lucide="upload-cloud" style="width:32px; height:32px; color:rgba(255,255,255,0.3); margin-bottom:0.5rem;"></i>
+                            <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin:0;">Cliquez ou glissez-déposez vos fichiers ici</p>
+                            <p style="color: rgba(229,233,238,0.3); font-size: 0.75rem; margin:0.3rem 0 0 0;">Images, Vidéos, Audio</p>
+                            <input type="file" name="media_files" id="media-file-input" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="this.form.submit()">
+                        </div>
+                    </form>
+                </div>
+
+                {% if medias %}
+                    {% for media in medias %}
+                    <div class="doc-item">
+                        <i data-lucide="{% if media.is_video %}video{% elif media.is_audio %}music{% else %}image{% endif %}" class="doc-icon"></i>
+                        <div class="doc-info">
+                            <p class="doc-name">{{ media.name }}</p>
+                            <p class="doc-meta">
+                                <span class="media-card-type {% if media.is_video %}type-video{% elif media.is_audio %}type-audio{% else %}type-image{% endif %}">{{ media.get_media_type_display }}</span>
+                                &bull; {{ media.uploaded_at|date:"d/m/Y" }}
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.8rem; align-items: center;">
+                            <a href="{{ media.file.url }}" target="_blank" class="doc-download" title="Voir">
+                                <i data-lucide="eye" style="width:18px;"></i>
+                            </a>
+                            <form method="post" action="{% url 'delete_media' media.id %}" style="display:inline;" onsubmit="return confirm('Supprimer ce média ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="media-delete-btn" title="Supprimer">
+                                    <i data-lucide="trash-2" style="width:16px;"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem;">Aucun média n'a été ajouté.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- INFORMATIONS Section (full-width bottom) -->
+    <div style="padding: 0 2rem 2rem 2rem;">
+        <div class="card-panel">
+            <h3 class="panel-title">
+                <span><i data-lucide="info" style="width:18px; margin-right:8px; vertical-align: middle;"></i> INFORMATIONS</span>
+            </h3>
+
+            {% if medias %}
+            <div class="media-grid">
+                {% for media in medias %}
+                <div class="media-card">
+                    {% if media.is_image %}
+                        <img src="{{ media.file.url }}" alt="{{ media.name }}" class="media-card-preview">
+                    {% elif media.is_video %}
+                        <video class="media-card-preview" muted>
+                            <source src="{{ media.file.url }}">
+                        </video>
+                    {% elif media.is_audio %}
+                        <div class="media-card-placeholder">
+                            <i data-lucide="music" style="width:40px; height:40px;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="media-card-body">
+                        <p class="media-card-name" title="{{ media.name }}">{{ media.name }}</p>
+                        <span class="media-card-type {% if media.is_video %}type-video{% elif media.is_audio %}type-audio{% else %}type-image{% endif %}">
+                            {% if media.is_video %}🎬 Vidéo{% elif media.is_audio %}🎵 Audio{% else %}🖼️ Image{% endif %}
+                        </span>
+                        <div class="media-card-actions">
+                            <a href="{{ media.file.url }}" target="_blank" class="btn-small" style="font-size:0.7rem;">Ouvrir</a>
+                            <form method="post" action="{% url 'delete_media' media.id %}" style="display:inline;" onsubmit="return confirm('Supprimer ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="media-delete-btn">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="padding: 2rem; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                <i data-lucide="folder-open" style="width:40px; height:40px; color:rgba(255,255,255,0.1); margin-bottom:0.5rem;"></i>
+                <p style="color: rgba(229,233,238,0.4); font-size: 0.85rem; margin: 0;">Aucun média uploadé. Ajoutez des images, vidéos ou sons depuis la section "Médias" ci-dessus.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

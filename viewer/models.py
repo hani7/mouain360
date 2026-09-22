@@ -64,6 +64,34 @@ class MissionDocument(models.Model):
     def __str__(self):
         return self.name
 
+class MissionMedia(models.Model):
+    """Non-360 media files: videos, sounds, regular images"""
+    MEDIA_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('video', 'Vidéo'),
+        ('audio', 'Audio'),
+    ]
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='medias')
+    file = models.FileField(upload_to='mission_medias/')
+    name = models.CharField(max_length=255)
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES, default='image')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_media_type_display()})"
+
+    @property
+    def is_image(self):
+        return self.media_type == 'image'
+
+    @property
+    def is_video(self):
+        return self.media_type == 'video'
+
+    @property
+    def is_audio(self):
+        return self.media_type == 'audio'
+
 class Room(models.Model):
     """A single 360° image representing a room/location in a house"""
     house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='rooms')
