@@ -311,9 +311,14 @@
 <body>
     <!-- Info Bar -->
     <div class="info-bar glass-panel">
-        <div>
-            <h1>{{ house.name }}</h1>
-            <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="https://mouin360.com" target="_blank" style="display:flex; align-items:center;">
+                <img src="/static/images/logo-360.png" alt="Mouin 360" style="height: 36px;">
+            </a>
+            <div>
+                <h1>{{ house.name }}</h1>
+                <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
+            </div>
         </div>
         <div class="controls">
             <a href="https://mouin360.com" target="_blank" class="btn" style="background:rgba(1,238,254,0.1);color:#01eefe;border:1px solid #01eefe;">⚡ Propulsé par Mouain 360</a>
