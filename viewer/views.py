@@ -6,8 +6,8 @@ import json
 
 from viewer.utils import generate_qr_code
 from floor_plan.models import FloorPlan
-from .models import Image, House, Room, RoomConnection, MissionParty, MissionDocument, MissionMedia
-from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm
+from .models import Image, House, Room, RoomConnection, RoomPoint, MissionParty, MissionDocument, MissionMedia
+from .forms import ImageUploadForm, HouseForm, RoomForm, RoomConnectionForm, RoomPointForm
 
 # ===== Dashboard View =====
 
@@ -331,6 +331,32 @@ def add_connection(request, room_id):
         'form': form,
         'room': from_room,
         'available_rooms': available_rooms
+    })
+
+@login_required
+def add_room_point(request, room_id):
+    """Place an information point (video, sound, image or text) on a 360° image"""
+    room = get_object_or_404(Room, id=room_id, house__owner=request.user)
+    if request.method == 'POST':
+        form = RoomPointForm(request.POST, request.FILES)
+        if form.is_valid():
+            point = form.save(commit=False)
+            point.room = room
+            point.save()
+            return redirect('add_room_point', room_id=room.id)
+    else:
+        form = RoomPointForm()
+
+    points = room.points.all()
+    points_data = [
+        {'id': p.id, 'pitch': p.pitch, 'yaw': p.yaw, 'kind': p.kind, 'description': p.description}
+        for p in points
+    ]
+    return render(request, 'add_room_point.html', {
+        'form': form,
+        'room': room,
+        'points': points,
+        'points_data': points_data,
     })
 
 @login_required

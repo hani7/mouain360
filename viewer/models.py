@@ -161,6 +161,25 @@ class Room(models.Model):
     class Meta:
         ordering = ['house', 'title']
 
+class RoomPoint(models.Model):
+    """Information point placed on a 360° image: video, sound, image or plain information"""
+    KIND_CHOICES = [
+        ('video', 'Vidéo'),
+        ('audio', 'Son'),
+        ('image', 'Image'),
+        ('info', 'Information'),
+    ]
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='points')
+    pitch = models.FloatField(help_text="Vertical angle for point in 360° view")
+    yaw = models.FloatField(help_text="Horizontal angle for point in 360° view")
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default='info')
+    description = models.CharField(max_length=255)
+    file = models.FileField(upload_to='room_points/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.room.title} - {self.get_kind_display()}: {self.description}"
+
 class RoomConnection(models.Model):
     """Hotspot that links one room to another in the 360° view"""
     from_room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='connections_from')

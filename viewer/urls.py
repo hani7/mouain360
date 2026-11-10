@@ -27,6 +27,7 @@ urlpatterns = [
     path('house/<int:house_id>/qr-code/', views.download_house_qr_code, name='download_house_qr_code'),
     path('room/<int:room_id>/edit-position/', views.edit_room_position, name='edit_room_position'),
     path('room/<int:room_id>/add-connection/', views.add_connection, name='add_connection'),
+    path('room/<int:room_id>/add-point/', views.add_room_point, name='add_room_point'),
     path('room/<int:room_id>/delete/', views.delete_room, name='delete_room'),
     path('room/<int:room_id>/set-starting-point/', views.set_starting_point, name='set_starting_point'),
     path('house/<int:house_id>/add-media/', views.add_media, name='add_media'),

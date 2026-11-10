@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% block title %}Ajouter un point dans {{ room.title }}{% endblock %}
+
+{% block content %}
+<style>
+  .mission-page {
+      max-width: 1400px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+  }
+
+  .layout-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      align-items: start;
+  }
+
+  @media (max-width: 1024px) {
+      .layout-grid {
+          grid-template-columns: 1fr;
+      }
+  }
+
+  .card-panel {
+      background: rgba(10, 15, 25, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .panel-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+  }
+
+  #panorama {
+      width: 100%;
+      height: 560px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: crosshair;
+  }
+
+  .instructions {
+      background: rgba(1, 237, 254, 0.05);
+      border: 1px solid rgba(1, 237, 254, 0.2);
+      color: #e5e9ee;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+  }
+
+  /* Point icons, shared by the 360 image and the list */
+  .kind-icon-video::before { content: '🎬'; }
+  .kind-icon-audio::before { content: '🔊'; }
+  .kind-icon-image::before { content: '🖼️'; }
+  .kind-icon-info::before { content: 'ℹ️'; }
+  .kind-icon-preview::before { content: '📍'; }
+
+  .room-point {
+      width: 36px !important;
+      height: 36px !important;
+      background: rgba(10, 15, 25, 0.85) !important;
+      background-image: none !important;
+      border: 2px solid var(--primary) !important;
+      border-radius: 50% !important;
+      box-shadow: 0 0 12px rgba(1, 237, 254, 0.6) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+  }
+
+  .point-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+  }
+
+  .point-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+  }
+
+  .point-list li.empty {
+      color: rgba(229,233,238,0.5);
+      font-size: 0.85rem;
+  }
+
+  .point-kind {
+      color: var(--primary);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+  }
+
+  .point-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+  }
+
+  .point-modal[hidden] {
+      display: none;
+  }
+
+  .point-modal-card {
+      width: 100%;
+      max-width: 480px;
+      margin: 1rem;
+      background: rgba(10, 15, 25, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .form-group {
+      margin-bottom: 1.5rem;
+  }
+
+  .form-group[hidden] {
+      display: none;
+  }
+
+  .form-group label {
+      display: block;
+      color: rgba(229,233,238,0.7);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+  }
+
+  .form-group select,
+  .form-group input[type="text"] {
+      width: 100%;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      transition: all 0.3s ease;
+  }
+
+  .form-group select option {
+      background: #0a0f19;
+      color: #fff;
+  }
+
+  .form-group select:focus,
+  .form-group input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 2px rgba(1, 237, 254, 0.2);
+  }
+
+  .form-group input[type="file"] {
+      color: rgba(229,233,238,0.7);
+      font-size: 0.85rem;
+  }
+
+  .help-text {
+      font-size: 0.75rem;
+      color: rgba(229,233,238,0.5);
+      margin-top: 0.4rem;
+  }
+
+  .field-error {
+      font-size: 0.8rem;
+      color: #ff4757;
+      margin-top: 0.4rem;
+  }
+
+  .position-badge {
+      display: inline-block;
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--primary);
+      font-family: monospace;
+      font-size: 0.9rem;
+  }
+
+  .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+  }
+
+  .btn-outline:hover {
+      background: rgba(255,255,255,0.05);
+  }
+
+  .btn-primary-neon {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.3s;
+      box-shadow: 0 0 15px rgba(1, 237, 254, 0.4);
+  }
+
+  .btn-primary-neon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(1, 237, 254, 0.6);
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
+
+<div class="mission-page">
+  <div style="margin-bottom: 2rem;">
+      <h1 style="margin:0; font-size: 1.8rem;">Ajouter un point dans "{{ room.title }}"</h1>
+  </div>
+
+  <div class="layout-grid">
+      <!-- Left Column: Viewer -->
+      <div class="card-panel">
+          <h3 class="panel-title">Cliquez sur l'image 360° pour placer un point</h3>
+          <div class="instructions">
+              <div>Cliquez à l'endroit voulu dans la vue 360°. Un formulaire s'ouvrira pour ajouter une description, un type (vidéo, son, image ou information) et un fichier.</div>
+          </div>
+          <div id="panorama"></div>
+      </div>
+
+      <!-- Right Column: Existing points -->
+      <div class="card-panel">
+          <h3 class="panel-title">Points existants ({{ points|length }})</h3>
+          <ul class="point-list">
+              {% for point in points %}
+              <li>
+                  <span class="kind-icon-{{ point.kind }}"></span>
+                  <div style="flex:1;">
+                      <div>{{ point.description }}</div>
+                      <div class="point-kind">{{ point.get_kind_display }}</div>
+                  </div>
+                  {% if point.file %}
+                  <a href="{{ point.file.url }}" target="_blank" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Ouvrir</a>
+                  {% endif %}
+              </li>
+              {% empty %}
+              <li class="empty">Aucun point pour le moment.</li>
+              {% endfor %}
+          </ul>
+          <div class="form-actions">
+              <a href="{% url 'house_detail' room.house.id %}" class="btn-outline">Retour à la mission</a>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Popup: appears after a position is chosen on the 360° image -->
+<div class="point-modal" id="point-modal" hidden>
+  <div class="point-modal-card">
+      <h3 class="panel-title">
+          Nouveau point
+          <span class="position-badge">Pitch: <span id="pitch-display">0.00</span>° | Yaw: <span id="yaw-display">0.00</span>°</span>
+      </h3>
+
+      <form method="post" enctype="multipart/form-data" id="point-form">
+          {% csrf_token %}
+          {{ form.pitch }}
+          {{ form.yaw }}
+
+          <div class="form-group">
+              <label for="id_description">Description *</label>
+              {{ form.description }}
+              {% for error in form.description.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+
+          <div class="form-group">
+              <label for="id_kind">Type *</label>
+              {{ form.kind }}
+              {% for error in form.kind.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+
+          <div class="form-group" id="file-group">
+              <label for="id_file">Fichier</label>
+              {{ form.file }}
+              <div class="help-text">Obligatoire pour une vidéo, un son ou une image.</div>
+              {% for error in form.file.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+
+          <div class="form-actions">
+              <button type="button" class="btn-outline" onclick="closePopup()">Annuler</button>
+              <button type="submit" class="btn-primary-neon">Enregistrer le point</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+{{ points_data|json_script:"room-points-data" }}
+
+<script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+<script>
+  const existingPoints = JSON.parse(document.getElementById('room-points-data').textContent);
+  const KIND_ACCEPT = { video: 'video/*', audio: 'audio/*', image: 'image/*' };
+
+  const panoramaEl = document.getElementById('panorama');
+  const modal = document.getElementById('point-modal');
+  const kindSelect = document.getElementById('id_kind');
+  const fileInput = document.getElementById('id_file');
+  const fileGroup = document.getElementById('file-group');
+
+  const viewer = pannellum.viewer('panorama', {
+    "type": "equirectangular",
+    "panorama": "{{ room.image.url }}",
+    "autoLoad": true,
+    "showControls": true,
+    "hotSpots": existingPoints.map(p => ({
+      "id": "point_" + p.id,
+      "pitch": p.pitch,
+      "yaw": p.yaw,
+      "type": "info",
+      "text": p.description,
+      "cssClass": "room-point kind-icon-" + p.kind
+    }))
+  });
+
+  // Click (not drag) on the image chooses a position
+  let pressX = 0;
+  let pressY = 0;
+  panoramaEl.addEventListener('mousedown', e => {
+    pressX = e.clientX;
+    pressY = e.clientY;
+  });
+
+  panoramaEl.addEventListener('click', e => {
+    if (Math.hypot(e.clientX - pressX, e.clientY - pressY) > 5) return;
+    if (e.target.closest('.pnlm-hotspot')) return;
+
+    const [pitch, yaw] = viewer.mouseEventToCoords(e);
+    openPopup(pitch, yaw);
+  });
+
+  function openPopup(pitch, yaw) {
+    document.getElementById('id_pitch').value = pitch;
+    document.getElementById('id_yaw').value = yaw;
+    document.getElementById('pitch-display').textContent = pitch.toFixed(2);
+    document.getElementById('yaw-display').textContent = yaw.toFixed(2);
+
+    viewer.removeHotSpot('preview');
+    viewer.addHotSpot({
+      "id": "preview",
+      "pitch": pitch,
+      "yaw": yaw,
+      "type": "info",
+      "cssClass": "room-point kind-icon-preview"
+    });
+    modal.hidden = false;
+  }
+
+  function closePopup() {
+    modal.hidden = true;
+    viewer.removeHotSpot('preview');
+  }
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closePopup();
+  });
+
+  // The file is only needed for media types; information points are text only
+  function updateFileInput() {
+    const kind = kindSelect.value;
+    fileGroup.hidden = kind === 'info';
+    fileInput.accept = KIND_ACCEPT[kind] || '';
+    if (kind === 'info') fileInput.value = '';
+  }
+  kindSelect.addEventListener('change', updateFileInput);
+  updateFileInput();
+
+  {% if form.errors %}
+  // Validation failed: reopen the popup with the submitted values
+  modal.hidden = false;
+  {% endif %}
+</script>
+{% endblock %}
