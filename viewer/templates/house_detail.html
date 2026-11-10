@@ -557,6 +557,7 @@
                         </div>
                         
                         <div class="room-actions">
+                            <a href="{% url 'house_walkthrough' house.id %}?room={{ room.id }}" target="_blank" class="btn-small" style="color:var(--primary); border-color:rgba(1,237,254,0.3);">Voir</a>
                             <a href="{% url 'add_connection' room.id %}" class="btn-small">Lier</a>
                             
                             {% if house.floor_plan_image %}

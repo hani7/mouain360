@@ -515,8 +515,8 @@
                 <label class="file-upload-area" style="display: block;">
                     <i data-lucide="image" style="width: 48px; height: 48px;"></i>
                     <p style="color: #fff; font-size: 1.1rem; margin: 0 0 0.5rem 0;">Ajoutez vos photos panoramiques 360°</p>
-                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin: 0;">Fichiers JPG (ratio 2:1 recommandé)</p>
-                    <input type="file" name="medias[]" multiple accept="image/jpeg,image/png" onchange="handleFileSelect(this, 'media-list', 'media-count')">
+                    <p style="color: rgba(229,233,238,0.5); font-size: 0.85rem; margin: 0;">Fichiers JPG, JPEG, PNG ou INSP Insta360 (ratio 2:1 recommandé)</p>
+                    <input type="file" name="medias[]" multiple accept="image/jpeg,image/png,.jpg,.jpeg,.png,.insp" onchange="handleFileSelect(this, 'media-list', 'media-count')">
                 </label>
                 <div id="media-list" class="file-preview-list" style="margin-top: 1rem;"></div>
             </div>

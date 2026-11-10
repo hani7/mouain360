@@ -107,7 +107,27 @@ class Room(models.Model):
     def __str__(self):
         return f"{self.house.name} - {self.title}"
 
+    def _convert_insp(self):
+        """Insta360 .insp photos are JPEGs with a proprietary trailer: re-encode as a plain .jpg"""
+        import os
+        from io import BytesIO
+        from django.core.files.base import ContentFile
+        from PIL import Image as PILImage
+
+        try:
+            img = PILImage.open(self.image.file)
+            img.load()
+            buffer = BytesIO()
+            img.convert('RGB').save(buffer, format='JPEG', quality=90)
+            new_name = os.path.splitext(os.path.basename(self.image.name))[0] + '.jpg'
+            self.image.save(new_name, ContentFile(buffer.getvalue()), save=False)
+        except Exception as e:
+            print(f".insp conversion failed: {e}")
+
     def save(self, *args, **kwargs):
+        if self.image and not self.image._committed and self.image.name.lower().endswith('.insp'):
+            self._convert_insp()
+
         # We need to save the model first so we have the image file on disk
         super().save(*args, **kwargs)
         

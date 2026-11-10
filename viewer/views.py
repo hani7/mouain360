@@ -391,8 +391,13 @@ def house_walkthrough(request, house_id):
     house = get_object_or_404(House, id=house_id, owner=request.user)
     rooms = house.rooms.all()
     
-    # Get starting room (or first room if none marked)
-    starting_room = house.rooms.filter(is_starting_point=True).first()
+    # Open on the requested room (?room=<id>), else the starting room, else the first room
+    starting_room = None
+    room_param = request.GET.get('room')
+    if room_param and room_param.isdigit():
+        starting_room = house.rooms.filter(id=int(room_param)).first()
+    if not starting_room:
+        starting_room = house.rooms.filter(is_starting_point=True).first()
     if not starting_room:
         starting_room = house.rooms.first()
     
