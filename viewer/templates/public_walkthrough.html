@@ -128,11 +128,11 @@
             max-width: 120px;
         }
 
-        .floor-plan-overlay[hidden] {
+        .side-stack [hidden] {
             display: none;
         }
 
-        .plan-toggle {
+        .panel-toggle {
             background: rgba(10, 15, 25, 0.85);
             border: 1px solid var(--primary);
             color: var(--primary);
@@ -392,7 +392,7 @@
     <!-- Plan and room list stacked at the bottom right -->
     <div class="side-stack">
     {% if house.floor_plan_image %}
-    <button type="button" class="plan-toggle" onclick="togglePlan()">📐 Plan</button>
+    <button type="button" class="panel-toggle" onclick="togglePanel('floor-plan')">📐 Plan</button>
     <div class="floor-plan-overlay glass-panel" id="floor-plan" hidden>
         <h3>📐 Plan d'Étage</h3>
         <div style="position: relative;">
@@ -403,7 +403,8 @@
     {% endif %}
 
     <!-- Room List -->
-    <div class="room-list glass-panel">
+    <button type="button" class="panel-toggle" onclick="togglePanel('room-list')">🏠 Pièces ({{ rooms.count }})</button>
+    <div class="room-list glass-panel" id="room-list" hidden>
         <h3>Pièces ({{ rooms.count }})</h3>
         {% for room in rooms %}
         <div class="room-list-item"
@@ -420,10 +421,10 @@
     <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
 
     <script>
-        // Show or hide the floor plan (opened from its button)
-        function togglePlan() {
-            const plan = document.getElementById('floor-plan');
-            plan.hidden = !plan.hidden;
+        // Show or hide a side panel (plan or room list) from its button
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.hidden = !panel.hidden;
         }
 
         {% if starting_room %}
