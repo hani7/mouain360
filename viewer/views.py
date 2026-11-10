@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 import json
 
 from viewer.utils import generate_qr_code
@@ -346,7 +347,31 @@ def add_room_point(request, room_id):
             return redirect('add_room_point', room_id=room.id)
     else:
         form = RoomPointForm()
+    return render_point_editor(request, room, form)
 
+@login_required
+def edit_room_point(request, point_id):
+    """Edit a point: the popup opens pre-filled on the 360° image"""
+    point = get_object_or_404(RoomPoint, id=point_id, room__house__owner=request.user)
+    if request.method == 'POST':
+        form = RoomPointForm(request.POST, request.FILES, instance=point)
+        if form.is_valid():
+            form.save()
+            return redirect('add_room_point', room_id=point.room.id)
+    else:
+        form = RoomPointForm(instance=point)
+    return render_point_editor(request, point.room, form, editing_point=point)
+
+@login_required
+@require_POST
+def delete_room_point(request, point_id):
+    """Delete a point from a 360° image"""
+    point = get_object_or_404(RoomPoint, id=point_id, room__house__owner=request.user)
+    room_id = point.room.id
+    point.delete()
+    return redirect('add_room_point', room_id=room_id)
+
+def render_point_editor(request, room, form, editing_point=None):
     points = room.points.all()
     points_data = [
         {'id': p.id, 'pitch': p.pitch, 'yaw': p.yaw, 'kind': p.kind, 'description': p.description}
@@ -357,6 +382,7 @@ def add_room_point(request, room_id):
         'room': room,
         'points': points,
         'points_data': points_data,
+        'editing_point': editing_point,
     })
 
 @login_required
@@ -422,7 +448,9 @@ def room_point_hotspots(room):
             'text': point.description,
             'cssClass': f'room-point kind-icon-{point.kind}'
         }
-        if point.file:
+        if point.kind == 'link' and point.url:
+            hotspot['URL'] = point.url
+        elif point.file:
             hotspot['URL'] = point.file.url
         hotspots.append(hotspot)
     return hotspots

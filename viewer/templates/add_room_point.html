@@ -139,7 +139,8 @@
   }
 
   .form-group select,
-  .form-group input[type="text"] {
+  .form-group input[type="text"],
+  .form-group input[type="url"] {
       width: 100%;
       background: rgba(0,0,0,0.2);
       border: 1px solid rgba(255,255,255,0.1);
@@ -156,7 +157,8 @@
   }
 
   .form-group select:focus,
-  .form-group input[type="text"]:focus {
+  .form-group input[type="text"]:focus,
+  .form-group input[type="url"]:focus {
       outline: none;
       border-color: var(--primary);
       background: rgba(0,0,0,0.4);
@@ -270,7 +272,14 @@
                   </div>
                   {% if point.file %}
                   <a href="{{ point.file.url }}" target="_blank" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Ouvrir</a>
+                  {% elif point.url %}
+                  <a href="{{ point.url }}" target="_blank" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Ouvrir</a>
                   {% endif %}
+                  <a href="{% url 'edit_room_point' point.id %}" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem;">Modifier</a>
+                  <form method="post" action="{% url 'delete_room_point' point.id %}" onsubmit="return confirm('Supprimer ce point ?');" style="margin:0;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-outline" style="padding:0.3rem 0.6rem; font-size:0.75rem; color:#ff4757; border-color:rgba(255,71,87,0.4);">Supprimer</button>
+                  </form>
               </li>
               {% empty %}
               <li class="empty">Aucun point pour le moment.</li>
@@ -287,8 +296,8 @@
 <div class="point-modal" id="point-modal" hidden>
   <div class="point-modal-card">
       <h3 class="panel-title">
-          Nouveau point
-          <span class="position-badge">Pitch: <span id="pitch-display">0.00</span>° | Yaw: <span id="yaw-display">0.00</span>°</span>
+          {% if editing_point %}Modifier le point{% else %}Nouveau point{% endif %}
+          <span class="position-badge">Pitch: <span id="pitch-display">{{ form.pitch.value|default:0|floatformat:2 }}</span>° | Yaw: <span id="yaw-display">{{ form.yaw.value|default:0|floatformat:2 }}</span>°</span>
       </h3>
 
       <form method="post" enctype="multipart/form-data" id="point-form">
@@ -311,8 +320,15 @@
           <div class="form-group" id="file-group">
               <label for="id_file">Fichier</label>
               {{ form.file }}
-              <div class="help-text">Obligatoire pour une vidéo, un son ou une image.</div>
+              <div class="help-text">Obligatoire pour une vidéo, un son ou une image.{% if editing_point.file %} Laisser vide pour garder le fichier actuel.{% endif %}</div>
               {% for error in form.file.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+
+          <div class="form-group" id="url-group">
+              <label for="id_url">Lien</label>
+              {{ form.url }}
+              <div class="help-text">Obligatoire pour un lien. Il s'ouvre dans un nouvel onglet.</div>
+              {% for error in form.url.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
           </div>
 
           <div class="form-actions">
@@ -335,6 +351,7 @@
   const kindSelect = document.getElementById('id_kind');
   const fileInput = document.getElementById('id_file');
   const fileGroup = document.getElementById('file-group');
+  const urlGroup = document.getElementById('url-group');
 
   const viewer = pannellum.viewer('panorama', {
     "type": "equirectangular",
@@ -393,18 +410,19 @@
     if (e.target === modal) closePopup();
   });
 
-  // The file is only needed for media types; information points are text only
+  // A file is needed for media types, a URL for links; information points are text only
   function updateFileInput() {
     const kind = kindSelect.value;
-    fileGroup.hidden = kind === 'info';
+    fileGroup.hidden = kind === 'info' || kind === 'link';
+    urlGroup.hidden = kind !== 'link';
     fileInput.accept = KIND_ACCEPT[kind] || '';
-    if (kind === 'info') fileInput.value = '';
+    if (fileGroup.hidden) fileInput.value = '';
   }
   kindSelect.addEventListener('change', updateFileInput);
   updateFileInput();
 
-  {% if form.errors %}
-  // Validation failed: reopen the popup with the submitted values
+  {% if form.errors or editing_point %}
+  // Validation failed or editing: open the popup with the submitted or saved values
   modal.hidden = false;
   {% endif %}
 </script>

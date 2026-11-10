@@ -84,3 +84,69 @@ class RoomPointTests(TestCase):
         self.assertIn('room-point kind-icon-info', hotspots)
         self.assertIn('room-point kind-icon-audio', hotspots)
         self.assertIn('"URL": "/media/room_points/', hotspots)
+
+    def test_link_point_saved_with_url(self):
+        self.client.login(username='owner', password='pass12345')
+        self.client.post(self.url, {
+            'pitch': '0', 'yaw': '0', 'kind': 'link', 'description': 'Plan du quartier',
+            'url': 'https://example.com/plan',
+        })
+        point = RoomPoint.objects.get(room=self.room)
+        self.assertEqual(point.kind, 'link')
+        self.assertEqual(point.url, 'https://example.com/plan')
+        self.assertFalse(point.file)
+
+    def test_link_point_requires_url(self):
+        self.client.login(username='owner', password='pass12345')
+        response = self.client.post(self.url, {
+            'pitch': '0', 'yaw': '0', 'kind': 'link', 'description': 'Lien vide',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response.context['form'], 'url', 'Veuillez indiquer le lien à ouvrir.')
+        self.assertFalse(RoomPoint.objects.exists())
+
+    def test_link_point_hotspot_opens_its_url(self):
+        RoomPoint.objects.create(room=self.room, pitch=0, yaw=0, kind='link', description='Plan',
+                                 url='https://example.com/plan')
+        self.client.login(username='owner', password='pass12345')
+        response = self.client.get(reverse('house_walkthrough', args=[self.room.house.id]))
+        hotspots = response.context['scenes_json']
+        self.assertIn('room-point kind-icon-link', hotspots)
+        self.assertIn('"URL": "https://example.com/plan"', hotspots)
+
+    def test_owner_can_edit_point(self):
+        point = RoomPoint.objects.create(room=self.room, pitch=5, yaw=20, kind='info', description='Ancien texte')
+        self.client.login(username='owner', password='pass12345')
+        url = reverse('edit_room_point', args=[point.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Modifier le point')
+        self.client.post(url, {
+            'pitch': '5', 'yaw': '20', 'kind': 'link', 'description': 'Nouveau texte', 'url': 'https://example.com',
+        })
+        point.refresh_from_db()
+        self.assertEqual(point.description, 'Nouveau texte')
+        self.assertEqual(point.kind, 'link')
+        self.assertEqual(point.url, 'https://example.com')
+
+    def test_other_user_cannot_edit_point(self):
+        point = RoomPoint.objects.create(room=self.room, pitch=5, yaw=20, kind='info', description='Privé')
+        self.client.login(username='other', password='pass12345')
+        response = self.client.get(reverse('edit_room_point', args=[point.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_owner_can_delete_point(self):
+        point = RoomPoint.objects.create(room=self.room, pitch=5, yaw=20, kind='info', description='À supprimer')
+        self.client.login(username='owner', password='pass12345')
+        url = reverse('delete_room_point', args=[point.id])
+        self.assertEqual(self.client.get(url).status_code, 405)
+        response = self.client.post(url)
+        self.assertRedirects(response, self.url)
+        self.assertFalse(RoomPoint.objects.filter(id=point.id).exists())
+
+    def test_other_user_cannot_delete_point(self):
+        point = RoomPoint.objects.create(room=self.room, pitch=5, yaw=20, kind='info', description='Privé')
+        self.client.login(username='other', password='pass12345')
+        response = self.client.post(reverse('delete_room_point', args=[point.id]))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(RoomPoint.objects.filter(id=point.id).exists())

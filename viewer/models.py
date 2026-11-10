@@ -165,6 +165,7 @@ class RoomPoint(models.Model):
     """Information point placed on a 360° image: video, sound, image or plain information"""
     KIND_CHOICES = [
         ('video', 'Vidéo'),
+        ('link', 'Lien'),
         ('audio', 'Son'),
         ('image', 'Image'),
         ('info', 'Information'),
@@ -175,6 +176,7 @@ class RoomPoint(models.Model):
     kind = models.CharField(max_length=10, choices=KIND_CHOICES, default='info')
     description = models.CharField(max_length=255)
     file = models.FileField(upload_to='room_points/', blank=True, null=True)
+    url = models.URLField(max_length=500, blank=True, help_text="Link opened by a 'Lien' point")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

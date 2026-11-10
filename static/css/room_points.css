@@ -2,6 +2,7 @@
 
 /* Point icons, one per kind */
 .kind-icon-video::before { content: '🎬'; }
+.kind-icon-link::before { content: '🔗'; }
 .kind-icon-audio::before { content: '🔊'; }
 .kind-icon-image::before { content: '🖼️'; }
 .kind-icon-info::before { content: 'ℹ️'; }

@@ -35,16 +35,19 @@ class RoomConnectionForm(forms.ModelForm):
 class RoomPointForm(forms.ModelForm):
     class Meta:
         model = RoomPoint
-        fields = ['pitch', 'yaw', 'kind', 'description', 'file']
+        fields = ['pitch', 'yaw', 'kind', 'description', 'file', 'url']
         widgets = {
             'pitch': forms.HiddenInput(),
             'yaw': forms.HiddenInput(),
             'description': forms.TextInput(attrs={'placeholder': 'Ex: Vidéo de la cuisine, Prise électrique...'}),
+            'url': forms.URLInput(attrs={'placeholder': 'https://...'}),
         }
 
     def clean(self):
         cleaned_data = super().clean()
         kind = cleaned_data.get('kind')
-        if kind and kind != 'info' and not cleaned_data.get('file'):
+        if kind == 'link' and not cleaned_data.get('url'):
+            self.add_error('url', 'Veuillez indiquer le lien à ouvrir.')
+        elif kind and kind not in ('info', 'link') and not cleaned_data.get('file'):
             self.add_error('file', 'Veuillez ajouter un fichier pour ce type de point.')
         return cleaned_data
