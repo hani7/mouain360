@@ -150,3 +150,25 @@ class RoomPointTests(TestCase):
         response = self.client.post(reverse('delete_room_point', args=[point.id]))
         self.assertEqual(response.status_code, 404)
         self.assertTrue(RoomPoint.objects.filter(id=point.id).exists())
+
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA)
+class InspUploadTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user('insp_owner', password='pass12345')
+        self.house = House.objects.create(owner=self.owner, name='Maison insp')
+        self.client.login(username='insp_owner', password='pass12345')
+        self.url = reverse('add_room', args=[self.house.id])
+
+    def test_insp_photo_is_accepted_and_saved_as_jpg(self):
+        insp = SimpleUploadedFile('pano.insp', make_jpeg().read(), content_type='application/octet-stream')
+        response = self.client.post(self.url, {'title': 'Salon', 'image': insp})
+        self.assertRedirects(response, reverse('house_detail', args=[self.house.id]))
+        room = Room.objects.get(house=self.house)
+        self.assertTrue(room.image.name.endswith('.jpg'))
+
+    def test_non_image_file_is_still_refused(self):
+        text = SimpleUploadedFile('notes.txt', b'pas une image', content_type='text/plain')
+        response = self.client.post(self.url, {'title': 'Salon', 'image': text})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Room.objects.exists())

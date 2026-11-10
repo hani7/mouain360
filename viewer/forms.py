@@ -1,5 +1,10 @@
 from django import forms
+from django.core.validators import FileExtensionValidator, get_available_image_extensions
 from .models import Image, House, Room, RoomConnection, RoomPoint
+
+class InspImageField(forms.ImageField):
+    """Image upload that also accepts Insta360 .insp photos (Room re-encodes them as .jpg when saved)"""
+    default_validators = [FileExtensionValidator(allowed_extensions=get_available_image_extensions() + ['insp'])]
 
 class ImageUploadForm(forms.ModelForm):
     class Meta:
@@ -15,6 +20,8 @@ class HouseForm(forms.ModelForm):
         }
 
 class RoomForm(forms.ModelForm):
+    image = InspImageField(label='Image')
+
     class Meta:
         model = Room
         fields = ['title', 'image', 'is_starting_point']
