@@ -116,14 +116,14 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            padding: 1rem;
+            padding: 0.6rem;
             z-index: 1000;
-            max-width: 300px;
+            max-width: 180px;
         }
-        
+
         .floor-plan-overlay h3 {
-            margin: 0 0 10px 0;
-            font-size: 0.9rem;
+            margin: 0 0 6px 0;
+            font-size: 0.7rem;
             color: rgba(229,233,238,0.7);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -360,11 +360,8 @@
                 <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
             </div>
         </div>
-        <div class="controls">
-            <a href="https://mouin360.com" target="_blank" class="btn" style="background:rgba(1,238,254,0.1);color:#01eefe;border:1px solid #01eefe;">⚡ Propulsé par Mouain 360</a>
-        </div>
     </div>
-    
+
     <!-- Main Panorama Viewer -->
     {% if starting_room %}
     <div id="panorama"></div>
