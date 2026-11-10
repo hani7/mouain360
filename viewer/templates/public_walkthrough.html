@@ -49,15 +49,13 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            right: 20px;
             z-index: 1000;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
         }
-        
+
         .info-bar h1 {
             color: white;
             font-size: 1.2rem;
@@ -66,12 +64,14 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
         }
-        
+
         .current-room {
             color: var(--primary);
             font-size: 0.9rem;
             font-weight: 500;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
         }
         
         .controls {
@@ -366,17 +366,13 @@
         <div class="loading-spinner"></div>
         <div class="loading-text">Chargement de la visite virtuelle...</div>
     </div>
-    <!-- Info Bar -->
-    <div class="info-bar glass-panel">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="https://mouin360.com" target="_blank" style="display:flex; align-items:center;">
-                <img src="/static/images/logo-360.png" alt="Mouin 360" style="height: 36px;">
-            </a>
-            <div>
-                <h1>{{ house.name }}</h1>
-                <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
-            </div>
-        </div>
+    <!-- Info Bar: logo on top, project name under it, on the left -->
+    <div class="info-bar">
+        <a href="https://mouin360.com" target="_blank">
+            <img src="/static/images/logo-360.png" alt="Mouin 360" style="height: 36px;">
+        </a>
+        <h1>{{ house.name }}</h1>
+        <div class="current-room" id="current-room-name">{{ starting_room.title }}</div>
     </div>
 
     <!-- Main Panorama Viewer -->
