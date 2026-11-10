@@ -411,6 +411,22 @@ def delete_media(request, media_id):
         media.delete()
     return redirect('house_detail', house_id=house_id)
 
+def room_point_hotspots(room):
+    """Information points of a room as Pannellum hotspots: the icon depends on the kind, media points open their file"""
+    hotspots = []
+    for point in room.points.all():
+        hotspot = {
+            'pitch': point.pitch,
+            'yaw': point.yaw,
+            'type': 'info',
+            'text': point.description,
+            'cssClass': f'room-point kind-icon-{point.kind}'
+        }
+        if point.file:
+            hotspot['URL'] = point.file.url
+        hotspots.append(hotspot)
+    return hotspots
+
 @login_required
 def house_walkthrough(request, house_id):
     """Main walkthrough viewer with Pannellum"""
@@ -442,13 +458,14 @@ def house_walkthrough(request, house_id):
                 'text': conn.label,
                 'sceneId': f'room_{conn.to_room.id}'
             })
-        
+        hotspots += room_point_hotspots(room)
+
         scenes[f'room_{room.id}'] = {
             'title': room.title,
             'panorama': room.image.url,
             'hotSpots': hotspots
         }
-    
+
     return render(request, 'house_walkthrough.html', {
         'house': house,
         'rooms': rooms,
@@ -480,6 +497,7 @@ def public_walkthrough(request, share_token):
                 'text': conn.label,
                 'sceneId': f'room_{conn.to_room.id}'
             })
+        hotspots += room_point_hotspots(room)
         scenes[f'room_{room.id}'] = {
             'title': room.title,
             'panorama': room.image.url,

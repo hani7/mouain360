@@ -73,3 +73,14 @@ class RoomPointTests(TestCase):
         point = RoomPoint.objects.get(room=self.room)
         self.assertEqual(point.kind, 'audio')
         self.assertTrue(point.file.name.startswith('room_points/'))
+
+    def test_points_are_hotspots_on_walkthrough(self):
+        RoomPoint.objects.create(room=self.room, pitch=5, yaw=20, kind='info', description='Compteur')
+        RoomPoint.objects.create(room=self.room, pitch=-5, yaw=40, kind='audio', description='Ambiance',
+                                 file=SimpleUploadedFile('ambiance.mp3', b'fake-audio'))
+        self.client.login(username='owner', password='pass12345')
+        response = self.client.get(reverse('house_walkthrough', args=[self.room.house.id]))
+        hotspots = response.context['scenes_json']
+        self.assertIn('room-point kind-icon-info', hotspots)
+        self.assertIn('room-point kind-icon-audio', hotspots)
+        self.assertIn('"URL": "/media/room_points/', hotspots)

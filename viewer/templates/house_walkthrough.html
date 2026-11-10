@@ -7,6 +7,7 @@
     
     <!-- Pannellum CSS -->
     <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
+    <link rel="stylesheet" href="/static/css/room_points.css">
     
     <style>
         :root {
@@ -359,6 +360,9 @@
             </div>
         </div>
         <div class="controls">
+            {% if starting_room %}
+            <a href="#" id="add-point-btn" class="btn btn-outline">📍 Ajouter un point</a>
+            {% endif %}
             <a href="{% url 'house_detail' house.id %}" class="btn btn-outline">Gérer la mission</a>
             <a href="{% url 'house_list' %}" class="btn btn-exit">Quitter</a>
         </div>
@@ -439,6 +443,7 @@
         
         // Update current room display on scene change
         viewer.on('scenechange', function(sceneId) {
+            updateAddPointLink(sceneId);
             const roomItems = document.querySelectorAll('.room-list-item');
             roomItems.forEach(item => {
                 item.classList.remove('active');
@@ -463,6 +468,14 @@
         function loadScene(sceneId) {
             viewer.loadScene(sceneId);
         }
+
+        // "Ajouter un point" opens the point editor (click on the 360° image) for the room on screen
+        const ADD_POINT_URL = "{% url 'add_room_point' 0 %}";
+        function updateAddPointLink(sceneId) {
+            const roomId = sceneId.replace('room_', '');
+            document.getElementById('add-point-btn').href = ADD_POINT_URL.replace('/0/', '/' + roomId + '/');
+        }
+        updateAddPointLink('room_{{ starting_room.id }}');
         
         // Set initial active room
         document.querySelector(`[data-room-id="{{ starting_room.id }}"]`).classList.add('active');
