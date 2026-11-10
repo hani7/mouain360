@@ -112,13 +112,34 @@
             background: rgba(244, 67, 54, 0.2);
         }
         
-        .floor-plan-overlay {
+        .side-stack {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            padding: 0.4rem;
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .floor-plan-overlay {
+            padding: 0.4rem;
             max-width: 120px;
+        }
+
+        .floor-plan-overlay[hidden] {
+            display: none;
+        }
+
+        .plan-toggle {
+            background: rgba(10, 15, 25, 0.85);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 8px;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+            cursor: pointer;
         }
 
         .floor-plan-overlay h3 {
@@ -209,11 +230,7 @@
         }
         
         .room-list {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
             padding: 1rem;
-            z-index: 1000;
             max-height: 300px;
             overflow-y: auto;
             min-width: 200px;
@@ -372,9 +389,11 @@
     </div>
     {% endif %}
     
-    <!-- Floor Plan Mini Map -->
+    <!-- Plan and room list stacked at the bottom right -->
+    <div class="side-stack">
     {% if house.floor_plan_image %}
-    <div class="floor-plan-overlay glass-panel">
+    <button type="button" class="plan-toggle" onclick="togglePlan()">📐 Plan</button>
+    <div class="floor-plan-overlay glass-panel" id="floor-plan" hidden>
         <h3>📐 Plan d'Étage</h3>
         <div style="position: relative;">
             <img src="{{ house.floor_plan_image.url }}" alt="Floor Plan" class="floor-plan-mini">
@@ -382,12 +401,12 @@
         </div>
     </div>
     {% endif %}
-    
+
     <!-- Room List -->
     <div class="room-list glass-panel">
         <h3>Pièces ({{ rooms.count }})</h3>
         {% for room in rooms %}
-        <div class="room-list-item" 
+        <div class="room-list-item"
              onclick="loadScene('room_{{ room.id }}')"
              data-room-id="{{ room.id }}"
              data-room-title="{{ room.title }}"
@@ -396,11 +415,17 @@
         </div>
         {% endfor %}
     </div>
-    
+    </div>
     <!-- Pannellum JS -->
     <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
-    
+
     <script>
+        // Show or hide the floor plan (opened from its button)
+        function togglePlan() {
+            const plan = document.getElementById('floor-plan');
+            plan.hidden = !plan.hidden;
+        }
+
         {% if starting_room %}
         // Parse scenes from Django
         const scenes = {{ scenes_json|safe }};
